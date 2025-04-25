@@ -1,4 +1,2 @@
-package backend.controller;
-
-public class PostController {
+package backend.controller;public class PostController {
 }
