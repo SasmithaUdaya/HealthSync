@@ -1,4 +1,4 @@
-import API from './api'; // ✅ You are using API instance correctly
+import API from './api'; // ✅ Correct axios instance
 
 // ✅ Register User
 export const registerUser = async (userData) => {
@@ -20,13 +20,22 @@ export const loginUser = async (userData) => {
   }
 };
 
-// Update User Interests
+// ✅ Update User Interests
 export const updateUserInterests = async (userId, interests) => {
-    try {
-      const response = await API.put(`/users/${userId}`, { interests });
-      return response.data;
-    } catch (error) {
-      throw error.response.data;
-    }
-  };
-  
+  try {
+    const response = await API.put(`/users/${userId}`, { interests });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+// ✅ ✅ ✅ New: Get Suggested Users
+export const getSuggestedUsers = async (userId) => {
+  try {
+    const response = await API.get(`/users/suggested/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : error.message;
+  }
+};
