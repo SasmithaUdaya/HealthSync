@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { loginUser } from '../services/userService'; // 👈 import login API
+import { loginUser } from '../services/userService';
+import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+
+  const navigate = useNavigate(); // ✅ Initialize navigate
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
@@ -17,13 +20,18 @@ function Login() {
       const res = await loginUser(formData);
       console.log('Login successful:', res);
       alert('Login Successful!');
-      // Later: navigate to Home Page
+  
+      // ✅ Save logged user in localStorage
+      localStorage.setItem('user', JSON.stringify(res));
+  
+      navigate("/"); // Redirect to Home
     } catch (err) {
       console.error('Login failed:', err);
       const errorMessage = err?.response?.data?.message || 'Login failed. Please check your credentials.';
       alert('Login Failed: ' + errorMessage);
     }
   };
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
