@@ -1,15 +1,11 @@
 package backend.service;
 
-import backend.model.User;
+import backend.model.Follow;
 import java.util.List;
 
 public interface FollowService {
-
-    void followUser(Long followerId, Long followingId);
-
-    void unfollowUser(Long followerId, Long followingId);
-
-    List<User> getFollowers(Long userId);
-
-    List<User> getFollowing(Long userId);
+    void followUser(String followerId, String followingId);
+    void unfollowUser(String followerId, String followingId);
+    List<Follow> getFollowing(String userId);
+    List<Follow> getFollowers(String userId);
 }

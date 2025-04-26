@@ -1,15 +1,14 @@
 package backend.repository;
 
 import backend.model.Follow;
-import backend.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
-public interface FollowRepository extends JpaRepository<Follow, Long> {
+public interface FollowRepository extends MongoRepository<Follow, String> {
 
-    List<Follow> findByFollower(User follower);
+    List<Follow> findByFollowerId(String followerId);
 
-    List<Follow> findByFollowing(User following);
+    List<Follow> findByFollowingId(String followingId);
 
-    void deleteByFollowerAndFollowing(User follower, User following);
+    void deleteByFollowerIdAndFollowingId(String followerId, String followingId);
 }

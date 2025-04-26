@@ -8,11 +8,11 @@ public interface UserService {
 
     User registerUser(User user);
 
-    User updateUser(Long userId, User updatedUser);
+    User updateUser(String userId, User updatedUser);
 
-    void deleteUser(Long userId);
+    void deleteUser(String userId);
 
-    Optional<User> getUserById(Long userId);
+    Optional<User> getUserById(String userId);
 
-    List<User> getSuggestedUsers(Long userId);
+    List<User> getSuggestedUsers(String userId);
 }

@@ -1,22 +1,25 @@
 package backend.model;
 
-import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "follows")
 @Data
+@Document(collection = "follows")
 public class Follow {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "follower_id", nullable = false)
-    private User follower;
+    private String followerId;
+    private String followingId;
 
-    @ManyToOne
-    @JoinColumn(name = "following_id", nullable = false)
-    private User following;
+    // Setter methods for followerId and followingId
+    public void setFollowerId(String followerId) {
+        this.followerId = followerId;
+    }
+
+    public void setFollowingId(String followingId) {
+        this.followingId = followingId;
+    }
 }
