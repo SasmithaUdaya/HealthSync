@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { loginUser } from '../services/userService'; // 👈 import login API
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -10,10 +11,18 @@ function Login() {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Login form data:', formData);
-    // Later, call the login API here
+    try {
+      const res = await loginUser(formData);
+      console.log('Login successful:', res);
+      alert('Login Successful!');
+      // Later: navigate to Home Page
+    } catch (err) {
+      console.error('Login failed:', err);
+      const errorMessage = err?.response?.data?.message || 'Login failed. Please check your credentials.';
+      alert('Login Failed: ' + errorMessage);
+    }
   };
 
   return (
