@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/userService'; // 👈 import register API
+import { toast } from 'react-toastify'; // ✅ Import Toastify
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -11,10 +12,10 @@ function Register() {
     password: '',
   });
 
-  const navigate = useNavigate(); // ✅ add navigate hook
+  const navigate = useNavigate(); // ✅ Add navigate hook
 
   const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value});
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -23,13 +24,23 @@ function Register() {
       const res = await registerUser(formData);
       console.log('Register successful:', res);
 
-      localStorage.setItem('user', JSON.stringify(res)); // ✅ Save user to localStorage (for interest page)
+      localStorage.setItem('user', JSON.stringify(res)); // ✅ Save user to localStorage
 
-      alert('Register Successful!');
-      navigate('/select-interests'); // ✅ Navigate to interests page after register
+      toast.success('🎉 Registration successful! Welcome to HealthSync.', {
+        position: 'top-center',
+        autoClose: 2500,
+      });
+
+      setTimeout(() => {
+        navigate('/select-interests'); // ✅ Navigate to interests page after short delay
+      }, 2700);
     } catch (err) {
       console.error('Register failed:', err);
-      alert('Register Failed: ' + (err.message || 'Something went wrong'));
+
+      toast.error(`❌ Registration failed: ${err.message || 'Something went wrong'}`, {
+        position: 'top-center',
+        autoClose: 3000,
+      });
     }
   };
 
@@ -98,7 +109,10 @@ function Register() {
           />
         </div>
 
-        <button type="submit" className="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition">
+        <button
+          type="submit"
+          className="w-full bg-purple-500 text-white py-2 rounded-lg hover:bg-purple-600 transition font-semibold text-lg"
+        >
           Register
         </button>
       </form>
