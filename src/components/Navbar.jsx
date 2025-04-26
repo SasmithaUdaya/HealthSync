@@ -20,12 +20,10 @@ function Navbar() {
 
   return (
     <nav className="bg-blue-600 py-4 px-8 flex items-center justify-between shadow-md">
-      {/* Left Side Logo */}
       <Link to="/" className="text-white text-3xl font-bold tracking-wide">
         HealthSync
       </Link>
 
-      {/* Center Menu */}
       <div className="flex items-center space-x-12">
         <Link to="/" className="text-white hover:text-gray-300 text-xl font-medium transition duration-300">
           Home
@@ -44,13 +42,10 @@ function Navbar() {
 
         {user && (
           <div className="flex items-center space-x-6">
-            {/* Profile Circle */}
             <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl shadow-md">
               {user.firstName?.charAt(0)}
               {user.lastName?.charAt(0)}
             </div>
-
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded-lg transition text-lg"
