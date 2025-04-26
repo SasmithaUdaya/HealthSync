@@ -20,19 +20,25 @@ function Navbar() {
 
   return (
     <nav className="bg-blue-600 p-4 flex justify-between items-center shadow-md">
-      <Link to="/" className="text-white text-2xl font-bold">
-        HealthSync
-      </Link>
-      <div className="flex space-x-6">
-        <Link to="/" className="text-white hover:text-gray-300">Home</Link>
+      <div className="flex items-center space-x-4">
+        <Link to="/" className="text-white text-2xl font-bold">
+          HealthSync
+        </Link>
+      </div>
+
+      <div className="flex items-center space-x-6">
+        <Link to="/" className="text-white hover:text-gray-200 text-lg">Home</Link>
         {!user && (
           <>
-            <Link to="/login" className="text-white hover:text-gray-300">Login</Link>
-            <Link to="/register" className="text-white hover:text-gray-300">Register</Link>
+            <Link to="/login" className="text-white hover:text-gray-200 text-lg">Login</Link>
+            <Link to="/register" className="text-white hover:text-gray-200 text-lg">Register</Link>
           </>
         )}
         {user && (
-          <button onClick={handleLogout} className="text-white hover:text-gray-300">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
             Logout
           </button>
         )}

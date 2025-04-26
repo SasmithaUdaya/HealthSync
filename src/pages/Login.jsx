@@ -1,14 +1,13 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/userService';
-import { useNavigate } from 'react-router-dom'; // ✅ Import useNavigate
 
 function Login() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
@@ -19,19 +18,23 @@ function Login() {
     try {
       const res = await loginUser(formData);
       console.log('Login successful:', res);
-      alert('Login Successful!');
-  
-      // ✅ Save logged user in localStorage
+
+      // ✅ Save logged-in user to localStorage
       localStorage.setItem('user', JSON.stringify(res));
-  
-      navigate("/"); // Redirect to Home
+
+      alert('Login Successful!');
+
+      // ✅ Navigate to Home
+      navigate('/');
+
+      // ✅ Reload the page to update Navbar properly
+      window.location.reload();
+
     } catch (err) {
       console.error('Login failed:', err);
-      const errorMessage = err?.response?.data?.message || 'Login failed. Please check your credentials.';
-      alert('Login Failed: ' + errorMessage);
+      alert('Login Failed: ' + (err.message || 'Something went wrong'));
     }
   };
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
