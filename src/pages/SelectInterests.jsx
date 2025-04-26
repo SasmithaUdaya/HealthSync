@@ -31,7 +31,8 @@ function SelectInterests() {
 
       await updateUserInterests(user.id, selectedInterests);
       toast.success('Interests saved! Showing suggestions...');
-      navigate('/suggested');
+      navigate('/'); 
+
     } catch (error) {
       console.error('Failed to save interests:', error);
       toast.error('Failed to save interests.');
