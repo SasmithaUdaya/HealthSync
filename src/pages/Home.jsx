@@ -31,11 +31,11 @@ function Home() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 py-8 px-4">
-      <h1 className="text-4xl font-bold text-indigo-700 mb-6">Welcome to HealthSync 🏡</h1>
+      <h1 className="text-4xl font-bold text-indigo-700 mb-6">Welcome to HealthSync</h1>
 
       {user && (
         <h2 className="text-2xl font-semibold text-gray-700 mb-10">
-          Hello, {user.firstName} {user.lastName} 👋
+          Hello, {user.firstName} {user.lastName} 
         </h2>
       )}
 
