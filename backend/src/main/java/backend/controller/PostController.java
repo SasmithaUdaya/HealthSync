@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ import java.nio.file.Paths;
 @Slf4j
 @RequestMapping("/post")
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
     //create crud operation
     @Autowired
@@ -38,8 +40,9 @@ public class PostController {
         PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO);
         return ResponseEntity.ok(postResponseDTO);
     }
-    @CrossOrigin(origins = "http://localhost:5173")
-    @PostMapping("/postimage")
+
+    @PostMapping(value = "/postimage",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String postImage(@RequestParam("file") MultipartFile file) {
         // Set the correct path to the uploads folder
         String folder = "D:/HealthSync/backend/src/main/uploads/";

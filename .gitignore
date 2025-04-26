@@ -1,1 +1,3 @@
 .idea
+web-client/package-lock.json
+web-client/.env
