@@ -26,7 +26,7 @@ function Register() {
       localStorage.setItem('user', JSON.stringify(res)); // ✅ Save user to localStorage (for interest page)
 
       alert('Register Successful!');
-      navigate('/');
+      navigate('/select-interests'); // ✅ Navigate to interests page after register
     } catch (err) {
       console.error('Register failed:', err);
       alert('Register Failed: ' + (err.message || 'Something went wrong'));
