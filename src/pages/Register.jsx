@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../services/userService'; // 👈 import register API
 
 function Register() {
@@ -10,6 +11,8 @@ function Register() {
     password: '',
   });
 
+  const navigate = useNavigate(); // ✅ add navigate hook
+
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
@@ -19,8 +22,11 @@ function Register() {
     try {
       const res = await registerUser(formData);
       console.log('Register successful:', res);
+
+      localStorage.setItem('user', JSON.stringify(res)); // ✅ Save user to localStorage (for interest page)
+
       alert('Register Successful!');
-      // Later: navigate to Login page
+      navigate('/select-interests'); // ✅ Navigate to interests page after register
     } catch (err) {
       console.error('Register failed:', err);
       alert('Register Failed: ' + (err.message || 'Something went wrong'));

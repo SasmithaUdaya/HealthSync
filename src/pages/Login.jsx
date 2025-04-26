@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/userService';
+import { toast } from 'react-toastify';
+
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -22,7 +24,7 @@ function Login() {
       // ✅ Save logged-in user to localStorage
       localStorage.setItem('user', JSON.stringify(res));
 
-      alert('Login Successful!');
+      + toast.success('Login Successful!');
 
       // ✅ Navigate to Home
       navigate('/');
@@ -32,7 +34,7 @@ function Login() {
 
     } catch (err) {
       console.error('Login failed:', err);
-      alert('Login Failed: ' + (err.message || 'Something went wrong'));
+      + toast.error('Login Failed: ' + (err.message || 'Something went wrong'));
     }
   };
 

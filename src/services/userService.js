@@ -1,6 +1,6 @@
-import API from './api';
+import API from './api'; // ✅ You are using API instance correctly
 
-// Register User
+// ✅ Register User
 export const registerUser = async (userData) => {
   try {
     const response = await API.post('/users/register', userData);
@@ -10,7 +10,7 @@ export const registerUser = async (userData) => {
   }
 };
 
-// Login User
+// ✅ Login User
 export const loginUser = async (userData) => {
   try {
     const response = await API.post('/users/login', userData);
@@ -19,3 +19,14 @@ export const loginUser = async (userData) => {
     throw error.response.data;
   }
 };
+
+// Update User Interests
+export const updateUserInterests = async (userId, interests) => {
+    try {
+      const response = await API.put(`/users/${userId}`, { interests });
+      return response.data;
+    } catch (error) {
+      throw error.response.data;
+    }
+  };
+  
