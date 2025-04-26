@@ -15,4 +15,11 @@ public interface UserService {
     Optional<User> getUserById(String userId);
 
     List<User> getSuggestedUsers(String userId);
+
+    // UserService.java
+    List<String> updateUserInterests(String userId, List<String> interests);
+
+
+    // ✅ New: Login method
+    User loginUser(String email, String password);
 }
