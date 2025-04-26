@@ -19,36 +19,41 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-600 py-4 px-8 flex items-center justify-between shadow-md">
+    <nav className="bg-blue-600 py-4 px-8 shadow-md flex items-center justify-between">
+      {/* Left Side */}
       <Link to="/" className="text-white text-3xl font-bold tracking-wide">
         HealthSync
       </Link>
 
-      <div className="flex items-center space-x-12">
-        <Link to="/" className="text-white hover:text-gray-300 text-xl font-medium transition duration-300">
+      {/* Right Side */}
+      <div className="flex items-center gap-10">
+        <Link to="/" className="text-white hover:text-gray-300 text-lg font-medium transition">
           Home
         </Link>
 
         {!user && (
           <>
-            <Link to="/login" className="text-white hover:text-gray-300 text-xl font-medium transition duration-300">
+            <Link to="/login" className="text-white hover:text-gray-300 text-lg font-medium transition">
               Login
             </Link>
-            <Link to="/register" className="text-white hover:text-gray-300 text-xl font-medium transition duration-300">
+            <Link to="/register" className="text-white hover:text-gray-300 text-lg font-medium transition">
               Register
             </Link>
           </>
         )}
 
         {user && (
-          <div className="flex items-center space-x-6">
-            <div className="w-12 h-12 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl shadow-md">
+          <div className="flex items-center gap-6">
+            {/* Profile Icon */}
+            <div className="w-10 h-10 rounded-full bg-white text-blue-600 flex items-center justify-center font-bold text-xl">
               {user.firstName?.charAt(0)}
               {user.lastName?.charAt(0)}
             </div>
+
+            {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-5 rounded-lg transition text-lg"
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               Logout
             </button>
