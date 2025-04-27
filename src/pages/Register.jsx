@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../services/userService'; // 👈 import register API
-import { toast } from 'react-toastify'; // ✅ Import Toastify
+import { registerUser } from '../services/userService'; //  import register API
+import { toast } from 'react-toastify'; //  Import Toastify
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -12,7 +12,7 @@ function Register() {
     password: '',
   });
 
-  const navigate = useNavigate(); // ✅ Add navigate hook
+  const navigate = useNavigate(); //  Add navigate hook
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,7 +24,7 @@ function Register() {
       const res = await registerUser(formData);
       console.log('Register successful:', res);
 
-      localStorage.setItem('user', JSON.stringify(res)); // ✅ Save user to localStorage
+      localStorage.setItem('user', JSON.stringify(res)); //  Save user to localStorage
 
       toast.success('🎉 Registration successful! Welcome to HealthSync.', {
         position: 'top-center',
@@ -32,7 +32,7 @@ function Register() {
       });
 
       setTimeout(() => {
-        navigate('/select-interests'); // ✅ Navigate to interests page after short delay
+        navigate('/select-interests'); //  Navigate to interests page after short delay
       }, 2700);
     } catch (err) {
       console.error('Register failed:', err);

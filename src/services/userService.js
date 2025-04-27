@@ -1,6 +1,6 @@
-import API from './api'; // ✅ Correct axios instance
+import API from './api'; // Correct axios instance
 
-// ✅ Register User
+// Register User
 export const registerUser = async (userData) => {
   try {
     const response = await API.post('/users/register', userData);
@@ -10,7 +10,7 @@ export const registerUser = async (userData) => {
   }
 };
 
-// ✅ Login User
+// Login User
 export const loginUser = async (userData) => {
   try {
     const response = await API.post('/users/login', userData);
@@ -20,7 +20,7 @@ export const loginUser = async (userData) => {
   }
 };
 
-// ✅ Update User Interests
+// Update User Interests
 export const updateUserInterests = async (userId, interests) => {
   try {
     const response = await API.put(`/users/${userId}`, { interests });
@@ -30,7 +30,7 @@ export const updateUserInterests = async (userId, interests) => {
   }
 };
 
-// ✅ ✅ ✅ New: Get Suggested Users
+// Get Suggested Users
 export const getSuggestedUsers = async (userId) => {
   try {
     const response = await API.get(`/users/suggested/${userId}`);

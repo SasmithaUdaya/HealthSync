@@ -21,15 +21,15 @@ function Login() {
       const res = await loginUser(formData);
       console.log('Login successful:', res);
 
-      // ✅ Save logged-in user to localStorage
+      //  Save logged-in user to localStorage
       localStorage.setItem('user', JSON.stringify(res));
 
       + toast.success('Login Successful!');
 
-      // ✅ Navigate to Home
+      //  Navigate to Home
       navigate('/');
 
-      // ✅ Reload the page to update Navbar properly
+      //  Reload the page to update Navbar properly
       window.location.reload();
 
     } catch (err) {
