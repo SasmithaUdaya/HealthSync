@@ -6,8 +6,9 @@ const AddPost = () => {
     const navigate = useNavigate();
     const [post, setPost] = useState({
         postCategory: '',
+        reference: '',
+        focus: '',
         description: '',
-        status: '',
         duration: '',
         postImage: null
     });
@@ -22,7 +23,7 @@ const AddPost = () => {
     ];
 
     const onInputChange = (e) => {
-        if(e.target.name === "postImage") {
+        if (e.target.name === "postImage") {
             const file = e.target.files[0];
             setPost({ ...post, postImage: file });
 
@@ -34,9 +35,9 @@ const AddPost = () => {
         } else {
             setPost({ ...post, [e.target.name]: e.target.value });
         }
-    }
+    };
 
-    const onsubmit = async (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append("file", post.postImage);
@@ -55,13 +56,14 @@ const AddPost = () => {
             return;
         }
 
-        const updatePost = {
+        const updatedPost = {
             ...post,
-            postImage: imageName};
+            postImage: imageName
+        };
 
         try {
-            await axios.post("http://localhost:8081/post/create", updatePost);
-            alert("Post added Successfully!");
+            await axios.post("http://localhost:8081/post/create", updatedPost);
+            alert("Post added successfully!");
             window.location.reload();
         } catch (err) {
             alert("Error adding post");
@@ -73,8 +75,9 @@ const AddPost = () => {
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white shadow-sm rounded-lg p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">Add New Post</h1>
-                    <form onSubmit={onsubmit} className="space-y-6">
+                    <form onSubmit={onSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 gap-6">
+                            {/* Category */}
                             <div>
                                 <label htmlFor="postCategory" className="block text-sm font-medium text-gray-700 mb-2">
                                     Category
@@ -96,6 +99,7 @@ const AddPost = () => {
                                 </select>
                             </div>
 
+                            {/* Description */}
                             <div>
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                                     Description
@@ -111,38 +115,59 @@ const AddPost = () => {
                                 />
                             </div>
 
+                            {/* Focus and Reference */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Status
+                                    <label htmlFor="focus" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Focus
                                     </label>
                                     <input
                                         type="text"
-                                        id="status"
-                                        name="status"
-                                        value={post.status}
+                                        id="focus"
+                                        name="focus"
+                                        value={post.focus}
                                         onChange={onInputChange}
+                                        placeholder="Enter focus area"
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                                         required
                                     />
                                 </div>
 
                                 <div>
-                                    <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Duration
+                                    <label htmlFor="reference" className="block text-sm font-medium text-gray-700 mb-2">
+                                        Reference (YouTube link)
                                     </label>
                                     <input
-                                        type="text"
-                                        id="duration"
-                                        name="duration"
-                                        value={post.duration}
+                                        type="url"
+                                        id="reference"
+                                        name="reference"
+                                        value={post.reference}
                                         onChange={onInputChange}
+                                        placeholder="https://youtube.com/..."
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
                                         required
                                     />
                                 </div>
                             </div>
 
+                            {/* Duration */}
+                            <div>
+                                <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
+                                    Duration
+                                </label>
+                                <input
+                                    type="text"
+                                    id="duration"
+                                    name="duration"
+                                    value={post.duration}
+                                    onChange={onInputChange}
+                                    placeholder="Ex: 3 months"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                                    required
+                                />
+                            </div>
+
+                            {/* Image Upload */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Post Image
@@ -156,7 +181,7 @@ const AddPost = () => {
                                                 className="w-full h-48 object-cover mb-4 rounded-lg"
                                             />
                                             <p className="text-sm text-gray-600">
-                                                {post.postImage.name}
+                                                {post.postImage?.name}
                                             </p>
                                         </div>
                                     ) : (
@@ -178,7 +203,7 @@ const AddPost = () => {
                                             <div className="flex text-sm text-gray-600">
                                                 <label
                                                     htmlFor="postImage"
-                                                    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                                                    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500"
                                                 >
                                                     <span>Upload a file</span>
                                                     <input
@@ -203,17 +228,18 @@ const AddPost = () => {
                             </div>
                         </div>
 
+                        {/* Buttons */}
                         <div className="flex justify-end gap-4 mt-8">
                             <button
                                 type="button"
                                 onClick={() => navigate(-1)}
-                                className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
-                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                             >
                                 Create Post
                             </button>

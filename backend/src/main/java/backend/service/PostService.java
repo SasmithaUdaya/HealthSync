@@ -26,9 +26,10 @@ public class PostService {
     public PostResponseDTO createPost(PostRequestDTO requestDTO){
         try{
             Post newPost =  Post.builder()
+                    .reference(requestDTO.getReference())
                     .postCategory(requestDTO.getPostCategory())
                     .description(requestDTO.getDescription())
-                    .status(requestDTO.getStatus())
+                    .focus(requestDTO.getFocus())
                     .duration(requestDTO.getDuration())
                     .postImage(requestDTO.getPostImage())
                     .build();
@@ -38,9 +39,10 @@ public class PostService {
             // Create a response DTO
             PostResponseDTO responseDTO = new PostResponseDTO();
             responseDTO.setPostId(newPost.getPostId());
+            responseDTO.setReference(newPost.getReference());
             responseDTO.setPostCategory(newPost.getPostCategory());
             responseDTO.setDescription(newPost.getDescription());
-            responseDTO.setStatus(newPost.getStatus());
+            responseDTO.setFocus(newPost.getFocus());
             responseDTO.setDuration(newPost.getDuration());
             responseDTO.setPostImage(newPost.getPostImage());
             return responseDTO;
@@ -56,9 +58,10 @@ public class PostService {
         return posts.stream().map(post -> {
             PostResponseDTO dto = new PostResponseDTO();
             dto.setPostId(post.getPostId());
+            dto.setReference(post.getReference());
             dto.setPostCategory(post.getPostCategory());
             dto.setDescription(post.getDescription());
-            dto.setStatus(post.getStatus());
+            dto.setFocus(post.getFocus());
             dto.setDuration(post.getDuration());
             dto.setPostImage(post.getPostImage());
             return dto;
@@ -71,9 +74,10 @@ public class PostService {
 
         PostResponseDTO dto = new PostResponseDTO();
         dto.setPostId(post.getPostId());
+        dto.setReference(post.getReference());
         dto.setPostCategory(post.getPostCategory());
         dto.setDescription(post.getDescription());
-        dto.setStatus(post.getStatus());
+        dto.setFocus(post.getFocus());
         dto.setDuration(post.getDuration());
         dto.setPostImage(post.getPostImage());
         return dto;
@@ -83,9 +87,10 @@ public class PostService {
         Post existingPost = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        existingPost.setReference(postDetails.getReference());
         existingPost.setPostCategory(postDetails.getPostCategory());
         existingPost.setDescription(postDetails.getDescription());
-        existingPost.setStatus(postDetails.getStatus());
+        existingPost.setFocus(postDetails.getFocus());
         existingPost.setDuration(postDetails.getDuration());
 
         // Save the new image if provided
