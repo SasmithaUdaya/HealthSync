@@ -8,6 +8,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     List<User> findByInterestsIn(List<String> interests);
 
-    // ✅ New: Find User by Email (for login)
+    //  New: Find User by Email (for login)
     User findByEmail(String email);
 }
