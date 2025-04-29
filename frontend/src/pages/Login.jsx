@@ -44,7 +44,7 @@ function Login() {
         <h2 className="text-2xl font-bold mb-6 text-center text-blue-600">Login</h2>
 
         <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
+          <label className="block text-gray-700">E-mail</label>
           <input
             type="email"
             name="email"
