@@ -23,7 +23,7 @@ public class PostService {
     private PostRepository postRepository;
     //private Object Collectors;
 
-    public PostResponseDTO createPost(PostRequestDTO requestDTO){
+    public PostResponseDTO createPost(PostRequestDTO requestDTO) {
         try{
             Post newPost =  Post.builder()
                     .reference(requestDTO.getReference())
@@ -45,6 +45,8 @@ public class PostService {
             responseDTO.setFocus(newPost.getFocus());
             responseDTO.setDuration(newPost.getDuration());
             responseDTO.setPostImage(newPost.getPostImage());
+
+
             return responseDTO;
         } catch (Exception e) {
             throw new RuntimeException(e);

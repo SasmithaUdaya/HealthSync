@@ -51,6 +51,8 @@ const AddPost = () => {
                 },
             });
             imageName = res.data;
+            // redirect after success
+            navigate('/');
         } catch (error) {
             alert("Error uploading image");
             return;

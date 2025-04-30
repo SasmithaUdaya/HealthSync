@@ -33,13 +33,19 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+
+
     //create inserting part
 
     @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO){
+    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO) {
+        // Get authenticated user (if needed)
+
         PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO);
         return ResponseEntity.ok(postResponseDTO);
     }
+
+
 
     @PostMapping(value = "/postimage",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

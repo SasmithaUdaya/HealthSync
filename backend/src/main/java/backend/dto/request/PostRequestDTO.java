@@ -12,6 +12,7 @@ public class PostRequestDTO {
     private String duration;
     private String postImage;
 
+
 }
 
 

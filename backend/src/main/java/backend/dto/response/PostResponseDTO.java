@@ -11,4 +11,5 @@ public class PostResponseDTO {
     private String focus;
     private String duration;
     private String postImage;
+    // Assuming you want to include the user ID in the response
 }

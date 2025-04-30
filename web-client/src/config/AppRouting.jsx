@@ -5,13 +5,14 @@ import UpdatePost from "../component/UpdatePost.jsx";
 import DisplayPosts from "../component/DisplayPosts.jsx";
 import DisplayPost from "../component/DisplayPost.jsx";
 
+
 export const AppRouting = () => {
     return (
         <BrowserRouter>
             <Routes>
                 <Route path={'/'} element={ <HomePage/>} />
                 <Route path="/addpost" element={<AddPost />} />
-                <Route path="/allposts" element={<DisplayPosts />} />
+                {/*<Route path="/allposts" element={<DisplayPosts />} />*/}
                 <Route path="/updatepost/:id" element={<UpdatePost />} />
                 <Route path="/post/:id" element={<DisplayPost />} />
             </Routes>
