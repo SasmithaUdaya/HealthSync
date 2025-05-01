@@ -20,17 +20,29 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
         try {
-            User user = userService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
+            User user = userService.loginUser(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+            );
             return ResponseEntity.ok(user);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Login failed: " + e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body("Login failed: " + e.getMessage());
         }
     }
 
     // ✅ Register
     @PostMapping("/register")
-    public User registerUser(@RequestBody User user) {
-        return userService.registerUser(user);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User registeredUser = userService.registerUser(user);
+            return ResponseEntity.ok(registeredUser);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Registration failed: " + e.getMessage());
+        }
     }
 
     // ✅ Update interests
@@ -42,36 +54,61 @@ public class UserController {
             List<String> updatedInterests = userService.updateUserInterests(userId, interests);
             return ResponseEntity.ok(updatedInterests);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body("Failed to update interests: " + e.getMessage());
         }
     }
 
-    // ✅ Update user
+    // ✅ Update user (for profile editing)
     @PutMapping("/{userId}")
-    public User updateUser(@PathVariable String userId, @RequestBody User updatedUser) {
-        return userService.updateUser(userId, updatedUser);
+    public ResponseEntity<?> updateUser(
+            @PathVariable String userId,
+            @RequestBody User updatedUser) {
+        try {
+            User user = userService.updateUser(userId, updatedUser);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Failed to update user: " + e.getMessage());
+        }
     }
 
     // ✅ Delete user
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
+    public ResponseEntity<?> deleteUser(@PathVariable String userId) {
+        try {
+            userService.deleteUser(userId);
+            return ResponseEntity.ok("User deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Failed to delete user: " + e.getMessage());
+        }
     }
 
     // ✅ Get user by ID
     @GetMapping("/{userId}")
-    public Optional<User> getUserById(@PathVariable String userId) {
-        return userService.getUserById(userId);
+    public ResponseEntity<?> getUserById(@PathVariable String userId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        if (userOptional.isPresent()) {
+            return ResponseEntity.ok(userOptional.get());
+        } else {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
     }
 
-    // ✅ Get suggested users
+    // ✅ Get suggested users based on shared interests
     @GetMapping("/suggested/{userId}")
     public ResponseEntity<?> getSuggestedUsers(@PathVariable String userId) {
         try {
             List<User> suggestedUsers = userService.getSuggestedUsers(userId);
             return ResponseEntity.ok(suggestedUsers);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity
+                    .badRequest()
+                    .body("Failed to get suggested users: " + e.getMessage());
         }
     }
 }
