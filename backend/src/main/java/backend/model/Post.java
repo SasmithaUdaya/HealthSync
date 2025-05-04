@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.List;
+
 
 // Remove the userId field from Post class
 @Document(collection = "Post")
@@ -27,5 +29,10 @@ public class Post {
     private String postImage;
     private String reference;
     private Data createdAt;
+    private String status;
+    private String imageUrl;
+    private String authorId;
+    private List<Comment> comments;
+    private List<Like> likes;
 
 }
