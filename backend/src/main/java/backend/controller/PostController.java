@@ -27,13 +27,9 @@ import java.nio.file.Paths;
 @CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
     //create crud operation
-    @Autowired
-    private PostRepository postRepository;
 
     @Autowired
     private PostService postService;
-
-
 
     //create inserting part
 
