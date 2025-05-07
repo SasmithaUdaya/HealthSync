@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { fetchPosts, getNotificationForAUser } from '../api/api'; 
-import Notification from '../components/Notification';
+import { getNotificationForAUser } from '../api/api';
+
 
 const Notifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -10,7 +10,7 @@ const Notifications = () => {
             const response = await getNotificationForAUser(); 
             setNotifications(response.data);
         };
-        fetchNotifications();
+        fetchNotifications().then();
     }, []);
 
     return (

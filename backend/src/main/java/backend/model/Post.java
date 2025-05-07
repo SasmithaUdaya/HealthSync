@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.userdetails.User;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 
@@ -28,9 +30,7 @@ public class Post {
     private String duration;
     private String postImage;
     private String reference;
-    private Data createdAt;
-    private String status;
-    private String imageUrl;
+    private LocalDateTime createdAt;
     private String authorId;
     private List<Comment> comments;
     private List<Like> likes;

@@ -25,7 +25,8 @@ public class PostService {
 
     public PostResponseDTO createPost(PostRequestDTO requestDTO) {
         try{
-            Post newPost =  Post.builder()
+            //check authid
+            Post newPost =  Post.builder() //update with authid
                     .reference(requestDTO.getReference())
                     .postCategory(requestDTO.getPostCategory())
                     .description(requestDTO.getDescription())
@@ -33,6 +34,7 @@ public class PostService {
                     .duration(requestDTO.getDuration())
                     .postImage(requestDTO.getPostImage())
                     .build();
+
             // Save the new post to the database
              postRepository.save(newPost);
 

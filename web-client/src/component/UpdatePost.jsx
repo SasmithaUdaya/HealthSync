@@ -57,7 +57,7 @@ function UpdatePost() {
             }
         };
 
-        fetchPost();
+        fetchPost().then();
     }, [id]);
 
     const onInputChange = (e) => {

@@ -11,6 +11,7 @@ export const HomePage = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingCommentText, setEditingCommentText] = useState("");
 
+
     const filteredData = useMemo(() => {
         if (!searchParam) return posts;
         return posts.filter(post =>
@@ -20,7 +21,7 @@ export const HomePage = () => {
     }, [posts, searchParam]);
 
     useEffect(() => {
-        loadPosts();
+        loadPosts().then();
     }, []);
 
     const loadPosts = async () => {
@@ -41,7 +42,7 @@ export const HomePage = () => {
         if (confirmation) {
             try {
                 await axios.delete(`http://localhost:8081/post/delete/${id}`);
-                loadPosts();
+                await loadPosts();
             } catch (error) {
                 console.error("Error deleting post", error);
             }
@@ -60,7 +61,7 @@ export const HomePage = () => {
                 author: "Current User"
             });
             setNewComment("");
-            loadPosts();
+            await loadPosts();
         } catch (error) {
             console.error("Error submitting comment:", error);
         }
@@ -68,12 +69,13 @@ export const HomePage = () => {
 
     const handleUpdateComment = async (postId, commentId) => {
         try {
+
             await axios.put(`http://localhost:8081/posts/${postId}/comments/${commentId}`, {
                 text: editingCommentText,
             });
             setEditingCommentId(null);
             setEditingCommentText("");
-            loadPosts();
+            await loadPosts();
         } catch (error) {
             console.error("Error updating comment:", error);
         }
@@ -84,7 +86,7 @@ export const HomePage = () => {
         if (confirmation) {
             try {
                 await axios.delete(`http://localhost:8081/posts/${postId}/comments/${commentId}`);
-                loadPosts();
+                await loadPosts();
             } catch (error) {
                 console.error("Error deleting comment:", error);
             }
@@ -195,7 +197,7 @@ export const HomePage = () => {
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    deletePost(post.postId);
+                                                    deletePost(post.postId).then();
                                                 }}
                                                 className="text-red-600 hover:text-red-800 text-sm"
                                             >
@@ -227,7 +229,7 @@ export const HomePage = () => {
                                                                             onClick={(e) => {
                                                                                 e.preventDefault();
                                                                                 e.stopPropagation();
-                                                                                handleUpdateComment(post.postId, comment.id);
+                                                                                handleUpdateComment(post.postId, comment.id).then();
                                                                             }}
                                                                             className="text-sm bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
                                                                         >
@@ -269,7 +271,7 @@ export const HomePage = () => {
                                                                                 onClick={(e) => {
                                                                                     e.preventDefault();
                                                                                     e.stopPropagation();
-                                                                                    handleDeleteComment(post.postId, comment.id);
+                                                                                    handleDeleteComment(post.postId, comment.id).then();
                                                                                 }}
                                                                                 className="text-sm text-red-600 hover:text-red-800"
                                                                             >
@@ -289,7 +291,7 @@ export const HomePage = () => {
                                                 onSubmit={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    handleCommentSubmit(e, post.postId);
+                                                    handleCommentSubmit(e, post.postId).then();
                                                 }}
                                             >
                                                 <input

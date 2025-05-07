@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getPostById, likePost, getCommentsForPost, deleteComment, updateComment } from '../api/api';
-import CommentForm from '../components/CommentForm';
+import CommentForm from "../component/CommentForm.jsx";
+
 
 const PostDetails = () => {
     const { id } = useParams();
@@ -15,14 +16,14 @@ const PostDetails = () => {
             const response = await getPostById(id);
             setPost(response.data);
         };
-        fetchPost();
+        fetchPost().then();
 
         // Fetch comments for the post
         const fetchComments = async () => {
             const response = await getCommentsForPost(id);
             setComments(response.data);
         };
-        fetchComments();
+        fetchComments().then();
     }, [id]);
 
     const handleLike = async () => {

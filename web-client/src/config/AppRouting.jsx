@@ -1,17 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useEffect } from 'react';
-
 import { HomePage } from "../pages/HomePage.jsx";
 import AddPost from "../component/AddPost.jsx";
 import UpdatePost from "../component/UpdatePost.jsx";
+import Notifications from "../pages/Notifications.jsx";
+import PostDetails from "../pages/PostDetails.jsx";
 import DisplayPost from "../component/DisplayPost.jsx";
 
-import Home from './pages/Home';
-import PostDetails from './pages/PostDetails';
-import Notifications from './pages/Notifications';
-import Navbar from './components/Navbar';
-
-import './App.css';
 
 const AppRouting = () => {
     // Set localStorage values once when component mounts
@@ -22,17 +17,19 @@ const AppRouting = () => {
 
     return (
         <BrowserRouter>
-            <Navbar />
+
             <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/homepage" element={<HomePage />} />
+
+                <Route path="/" element={<HomePage />} />
                 <Route path="/addpost" element={<AddPost />} />
                 <Route path="/updatepost/:id" element={<UpdatePost />} />
-                <Route path="/post/:id" element={<PostDetails />} />
+                {/*<Route path="/post/:id" element={<PostDetails />} />*/}
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/post/:id" element={<DisplayPost />} />
             </Routes>
         </BrowserRouter>
     );
 };
 
 export default AppRouting;
+

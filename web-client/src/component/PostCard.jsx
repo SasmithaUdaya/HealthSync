@@ -5,7 +5,8 @@ const PostCard = ({ post }) => {
   return (
     <div className="bg-black rounded-lg overflow-hidden shadow-md mb-4">
       <img
-        src={'https://static.independent.co.uk/2025/03/14/12/14/If-you-understand-the-principles-behind-lifting-weight-effectively-results-are-sure-to-follow.jpeg' ||post.imageUrl}
+          /* eslint-disable-next-line no-constant-binary-expression */
+        src={'https://static.independent.co.uk/2025/03/14/12/14/If-you-understand-the-principles-behind-lifting-weight-effectively-results-are-sure-to-follow.jpeg' || post?.imageUrl}
         alt={post.title}
         className="w-full h-48 object-cover"
       />
