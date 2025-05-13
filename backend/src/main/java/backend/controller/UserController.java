@@ -1,5 +1,9 @@
 package backend.controller;
 
+import backend.dto.request.LoginRequest;
+import backend.dto.request.RegisterRequest;
+import backend.dto.response.LoginResponse;
+import backend.utils.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import backend.model.User;
@@ -10,7 +14,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -18,12 +21,9 @@ public class UserController {
 
     // ✅ Login
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
-            User user = userService.loginUser(
-                    loginRequest.getEmail(),
-                    loginRequest.getPassword()
-            );
+            ApiResponse<LoginResponse> user = userService.loginUser(loginRequest);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity
@@ -34,9 +34,9 @@ public class UserController {
 
     // ✅ Register
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
         try {
-            User registeredUser = userService.registerUser(user);
+            ApiResponse<String> registeredUser = userService.registerUser(request);
             return ResponseEntity.ok(registeredUser);
         } catch (Exception e) {
             return ResponseEntity
