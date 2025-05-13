@@ -43,7 +43,7 @@ public class LearningPlanController {
     // Upload an image for the Learning Plan
     @PostMapping(value = "/lpimage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String uploadImage(@RequestParam("file") MultipartFile file) {
-        String folder = "D:/HealthSync/backend/src/main/uploads/";
+        String folder = "C:/Users/ASUS/Desktop/Y3 Sem 1 SLIIT/HealthSync/HealthSync/backend/src/main/uploads/";
         String lpImage = file.getOriginalFilename();
 
         try {
@@ -85,7 +85,7 @@ public class LearningPlanController {
     }
 
     // Get image associated with the Learning Plan
-    private final String UPLOAD_DIR = "D:/HealthSync/backend/src/main/uploads/";
+    private final String UPLOAD_DIR = "C:/Users/ASUS/Desktop/Y3 Sem 1 SLIIT/HealthSync/HealthSync/backend/src/main/uploads/";
 
     @GetMapping("/uploads/{filename}")
     public ResponseEntity<FileSystemResource> getImage(@PathVariable String filename) {
