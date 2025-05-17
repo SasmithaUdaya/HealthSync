@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-
-
+// Post APIs
 export const fetchPosts = async () => {
     return await api.get(`/posts`);
 };
@@ -14,48 +13,94 @@ export const getPostById = async (postId) => {
     return await api.get(`/posts/${postId}`);
 };
 
-export const likePost = async (like) => {
-    return await api.post(`/api/likes`, like);
+export const updatePost = async (postId, postData) => {
+    return await api.put(`/posts/${postId}`, postData);
 };
 
-export const addComment = async (comment) => {
-    return await api.post(`/api/comments`, comment);
+export const deletePost = async (postId) => {
+    return await api.delete(`/posts/${postId}`);
 };
 
-export const createNotification = async (notification) => {
-    return await api.post(`/notifications`, notification);
+
+// In your API service file (api.js), update the comment endpoints:
+export const createComment = async (postId, commentData) => {
+    return await api.post(`/comment/create/${postId}`, commentData);
 };
 
-export const markNotificationAsRead = async (notificationId) => {
-    return await api.put(`/api/notifications/${notificationId}/read`);
+export const updateComment = async (commentId, commentData) => {
+    return await api.put(`/comment/update/${commentId}`, commentData);
 };
 
-export const deleteNotification = async (notificationId) => {
-    return await api.delete(`/api/notifications/${notificationId}`);
+export const deleteComment = async (commentId) => {
+    return await api.delete(`/comment/delete/${commentId}`);
 };
 
 export const getCommentsForPost = async (postId) => {
-    return await api.get(`/api/comments/post/${postId}`);
+    return await api.get(`/comment/getcomments/${postId}`);
 };
 
 
-export const getNotificationForAUser =  async () =>{
-    const userId = localStorage.getItem('userId');
-    return await api.get(`/api/notifications/user/${userId}`)
-};
-export const deleteComment = async (commentId) => {
-    return await api.delete(`/api/comments/${commentId}`);
 
+
+// Like/Dislike APIs
+export const likePost = async (postId) => {
+    return await api.post(`/posts/${postId}/like`);
 };
 
-export const updateComment = async (commentId, newText) => {
-    const response = await api.put(`/api/comments/${commentId}`, {
-        text: newText
-    });
-    return response.data;
+export const dislikePost = async (postId) => {
+    return await api.post(`/posts/${postId}/dislike`);
 };
 
+export const getLikesCount = async (postId) => {
+    return await api.get(`/posts/${postId}/likes`);
+};
 
+export const getDislikesCount = async (postId) => {
+    return await api.get(`/posts/${postId}/dislikes`);
+};
+
+// Notification APIs
+export const fetchNotifications = async () => {
+    return await api.get(`/notifications`);
+};
+
+export const markNotificationAsRead = async (id) => {
+    return await api.put(`/notifications/${id}/read`);
+};
+
+export const deleteNotification = async (id) => {
+    return await api.delete(`/notifications/${id}`);
+};
+
+export const getNotificationsByPostId = async (postId) => {
+    return await api.get(`/notifications/post/${postId}`);
+};
+
+export const getNotificationsByCommentId = async (commentId) => {
+    return await api.get(`/notifications/comment/${commentId}`);
+};
+
+// User APIs
+export const getUserProfile = async (userId) => {
+    return await api.get(`/api/users/${userId}`);
+};
+
+export const updateUserProfile = async (userId, userData) => {
+    return await api.put(`/api/users/${userId}`, userData);
+};
+
+// Auth APIs
+export const loginUser = async (credentials) => {
+    return await api.post(`/api/auth/login`, credentials);
+};
+
+export const registerUser = async (userData) => {
+    return await api.post(`/api/auth/register`, userData);
+};
+
+export const logoutUser = async () => {
+    return await api.post(`/api/auth/logout`);
+};
 
 //----------------------------------axios config-----------------
 const api = axios.create({
@@ -71,6 +116,19 @@ api.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error)
+);
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Handle unauthorized access
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
 );
 
 export default api;
