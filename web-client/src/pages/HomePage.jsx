@@ -1,6 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+
+import {useAuth} from "../contexts/auth-context..jsx";
+import api from "../api/api.js";
 
 export const HomePage = () => {
     const [posts, setPosts] = useState([]);
@@ -11,6 +17,21 @@ export const HomePage = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingCommentText, setEditingCommentText] = useState("");
 
+
+
+
+    const { currentUser, logoutUser } = useAuth();
+
+    // useEffect(() => {
+    //     const fetchUsers = async () => {
+    //         const res = await api.get("/api/users/getall-users");
+    //         console.log(res.data);
+    //     };
+    //     fetchUsers().then();
+    // }, []);
+
+
+
     const filteredData = useMemo(() => {
         if (!searchParam) return posts;
         return posts.filter(post =>
@@ -20,38 +41,10 @@ export const HomePage = () => {
     }, [posts, searchParam]);
 
     useEffect(() => {
-        loadPosts();
+        loadPosts().then();
     }, []);
 
-    const loadPosts = async () => {
-        try {
-            const result = await axios.get("http://localhost:8081/post/getposts");
-            // For each post, fetch like/dislike counts
-            const postsWithLikes = await Promise.all(
-                result.data.map(async post => {
-                    try {
-                        const likesRes = await axios.get(`http://localhost:8081/api/posts/${post.postId}/likes`);
-                        const dislikesRes = await axios.get(`http://localhost:8081/api/posts/${post.postId}/dislikes`);
-                        return {
-                            ...post,
-                            likes: likesRes.data,
-                            dislikes: dislikesRes.data
-                        };
-                    } catch (error) {
-                        console.error("Error fetching like counts:", error);
-                        return {
-                            ...post,
-                            likes: 0,
-                            dislikes: 0
-                        };
-                    }
-                })
-            );
-            setPosts(postsWithLikes);
-        } catch (error) {
-            console.error("Error fetching posts", error);
-        }
-    };
+   
 
     const updateNavigate = (id) => {
         navigate(`/updatepost/${id}`);
@@ -61,8 +54,8 @@ export const HomePage = () => {
         const confirmation = window.confirm("Are you sure you want to delete this post?");
         if (confirmation) {
             try {
-                await axios.delete(`http://localhost:8081/post/delete/${id}`);
-                loadPosts();
+                await api.delete(`/post/delete/${id}`);
+                await loadPosts();
             } catch (error) {
                 console.error("Error deleting post", error);
             }
@@ -76,9 +69,9 @@ export const HomePage = () => {
     const handleCommentSubmit = async (e, postId) => {
         e.preventDefault();
         try {
-            await axios.post(`http://localhost:8081/posts/${postId}/comments`, {
+            await api.post(`/comment/create/${postId}`, {
                 text: newComment,
-                author: "Current User"
+                author: currentUser.username
             });
             setNewComment("");
             loadPosts();
@@ -86,29 +79,43 @@ export const HomePage = () => {
             console.error("Error submitting comment:", error);
         }
     };
-
+    
     const handleUpdateComment = async (postId, commentId) => {
         try {
-            await axios.put(`http://localhost:8081/posts/${postId}/comments/${commentId}`, {
+            await api.put(`/comment/update/${commentId}`, {
+                postId: postId,
                 text: editingCommentText,
+                author: currentUser.username // Include author info,
             });
             setEditingCommentId(null);
             setEditingCommentText("");
-            loadPosts();
+            await loadPosts();
+            toast.success("Comment updated successfully!");
         } catch (error) {
             console.error("Error updating comment:", error);
+            toast.error("Failed to update comment");
         }
     };
-
+    
     const handleDeleteComment = async (postId, commentId) => {
         const confirmation = window.confirm("Are you sure you want to delete this comment?");
         if (confirmation) {
             try {
-                await axios.delete(`http://localhost:8081/posts/${postId}/comments/${commentId}`);
+                await api.delete(`/comment/delete/${commentId}`);
                 loadPosts();
             } catch (error) {
                 console.error("Error deleting comment:", error);
             }
+        }
+    };
+    
+    const loadPosts = async () => {
+        try {
+            // Add the Authorization header here
+            const result = await api.get("/post/getposts", );
+            setPosts(result.data);
+        } catch (error) {
+            console.error("Error fetching posts", error);
         }
     };
 
@@ -119,32 +126,54 @@ export const HomePage = () => {
         }
         navigate(`/post/${postId}`);
     };
-    
-    
 
+
+    
     const handleLike = async (postId, e) => {
         e.preventDefault();
         e.stopPropagation();
         try {
-            await axios.post(`http://localhost:8081/api/posts/${postId}/like`);
-            // Optimistically update the UI
+            const response = await api.post(`/posts/${postId}/like`, {
+                userId: currentUser.id
+            });
+            fetchNotifications(); 
+            // Update the UI immediately
             setPosts(prevPosts => 
-                prevPosts.map(post => 
-                    post.postId === postId 
-                        ? { ...post, likes: (post.likes || 0) + 1 } 
-                        : post
-                )
+                prevPosts.map(post => {
+                    if (post.postId === postId) {
+                        // If already liked, unlike it
+                        if (post.isLiked) {
+                            return {
+                                ...post,
+                                isLiked: false,
+                                likes: post.likes - 1
+                            };
+                        } 
+                        // If disliked, change to like
+                        else if (post.isDisliked) {
+                            return {
+                                ...post,
+                                isLiked: true,
+                                isDisliked: false,
+                                likes: post.likes + 1,
+                                dislikes: post.dislikes - 1
+                            };
+                        }
+                        // If neither, add like
+                        else {
+                            return {
+                                ...post,
+                                isLiked: true,
+                                likes: post.likes + 1
+                            };
+                        }
+                    }
+                    return post;
+                })
             );
         } catch (error) {
             console.error("Error liking post:", error);
-            // Revert the optimistic update if the request fails
-            setPosts(prevPosts => 
-                prevPosts.map(post => 
-                    post.postId === postId 
-                        ? { ...post, likes: (post.likes || 0) - 1 } 
-                        : post
-                )
-            );
+            toast.error("Failed to like post");
         }
     };
     
@@ -152,32 +181,49 @@ export const HomePage = () => {
         e.preventDefault();
         e.stopPropagation();
         try {
-            await axios.post(`http://localhost:8081/api/posts/${postId}/dislike`);
-            // Optimistically update the UI
+            const response = await api.post(`/posts/${postId}/dislike`, {
+                userId: currentUser.id
+            });
+            
+            // Update the UI immediately
             setPosts(prevPosts => 
-                prevPosts.map(post => 
-                    post.postId === postId 
-                        ? { ...post, dislikes: (post.dislikes || 0) + 1 } 
-                        : post
-                )
+                prevPosts.map(post => {
+                    if (post.postId === postId) {
+                        // If already disliked, undislike it
+                        if (post.isDisliked) {
+                            return {
+                                ...post,
+                                isDisliked: false,
+                                dislikes: post.dislikes - 1
+                            };
+                        } 
+                        // If liked, change to dislike
+                        else if (post.isLiked) {
+                            return {
+                                ...post,
+                                isLiked: false,
+                                isDisliked: true,
+                                likes: post.likes - 1,
+                                dislikes: post.dislikes + 1
+                            };
+                        }
+                        // If neither, add dislike
+                        else {
+                            return {
+                                ...post,
+                                isDisliked: true,
+                                dislikes: post.dislikes + 1
+                            };
+                        }
+                    }
+                    return post;
+                })
             );
         } catch (error) {
             console.error("Error disliking post:", error);
-            // Revert the optimistic update if the request fails
-            setPosts(prevPosts => 
-                prevPosts.map(post => 
-                    post.postId === postId 
-                        ? { ...post, dislikes: (post.dislikes || 0) - 1 } 
-                        : post
-                )
-            );
+            toast.error("Failed to dislike post");
         }
     };
-
-
-    
-
-
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -186,7 +232,7 @@ export const HomePage = () => {
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">HealthSync Platform</h1>
                     <div className="w-full max-w-lg">
                         <button
-                            onClick={() => navigate('/addpost')}
+                            onClick={() => navigate(`/addpost/${currentUser.id}`)}
                             className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -210,8 +256,8 @@ export const HomePage = () => {
                 </div>
 
                 <div className="max-w-lg mx-auto py-6 px-4">
-                    {filteredData.length > 0 ? (
-                        filteredData.map((post) => (
+                    {filteredData?.length > 0 ? (
+                        filteredData?.map((post) => (
                             <div
                                 key={post.postId}
                                 onClick={(e) => handlePostClick(e, post.postId)}
@@ -222,7 +268,7 @@ export const HomePage = () => {
                                         <span className="text-indigo-600 text-sm font-medium">{post.postId?.charAt(0) || 'U'}</span>
                                     </div>
                                     <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-700">{post.postId || "Unknown User"}</p>
+                                        <p className="text-sm font-medium text-gray-700">{post.authorUsername || "Unknown User"}</p>
                                         <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
                                     </div>
                                 </div>
@@ -318,81 +364,81 @@ export const HomePage = () => {
                                     {expandedPostId === post.postId && (
                                         <div className="mt-4 pt-4 border-t comment-section">
                                             <div className="space-y-4 mb-4">
-                                                {post.comments?.map(comment => (
-                                                    <div key={comment.id} className="flex items-start gap-3">
-                                                        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
-                                                            U
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <p className="text-sm font-medium text-gray-700">{comment.author}</p>
-                                                            {editingCommentId === comment.id ? (
-                                                                <>
-                                                                    <input
-                                                                        type="text"
-                                                                        value={editingCommentText}
-                                                                        onChange={(e) => setEditingCommentText(e.target.value)}
-                                                                        className="w-full px-2 py-1 border rounded text-sm"
-                                                                    />
-                                                                    <div className="flex gap-2 mt-2">
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.preventDefault();
-                                                                                e.stopPropagation();
-                                                                                handleUpdateComment(post.postId, comment.id);
-                                                                            }}
-                                                                            className="text-sm bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
-                                                                        >
-                                                                            Save
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.preventDefault();
-                                                                                e.stopPropagation();
-                                                                                setEditingCommentId(null);
-                                                                                setEditingCommentText("");
-                                                                            }}
-                                                                            className="text-sm bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
-                                                                        >
-                                                                            Cancel
-                                                                        </button>
-                                                                    </div>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <p className="text-gray-600 text-sm">{comment.text}</p>
-                                                                    <p className="text-xs text-gray-400 mt-1">
-                                                                        {new Date(comment.timestamp).toLocaleString()}
-                                                                    </p>
-                                                                    {comment.author === "Current User" && (
-                                                                        <div className="flex gap-2 mt-2">
-                                                                            <button
-                                                                                onClick={(e) => {
-                                                                                    e.preventDefault();
-                                                                                    e.stopPropagation();
-                                                                                    setEditingCommentId(comment.id);
-                                                                                    setEditingCommentText(comment.text);
-                                                                                }}
-                                                                                className="text-sm text-indigo-600 hover:text-indigo-800"
-                                                                            >
-                                                                                Edit
-                                                                            </button>
-                                                                            <button
-                                                                                onClick={(e) => {
-                                                                                    e.preventDefault();
-                                                                                    e.stopPropagation();
-                                                                                    handleDeleteComment(post.postId, comment.id);
-                                                                                }}
-                                                                                className="text-sm text-red-600 hover:text-red-800"
-                                                                            >
-                                                                                Delete
-                                                                            </button>
-                                                                        </div>
-                                                                    )}
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                            {post.comments?.map(comment => (
+    <div key={comment.id} className="flex items-start gap-3">
+        <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs">
+            {comment.author?.charAt(0)?.toUpperCase() || 'U'}
+        </div>
+        <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700">{comment.author}</p>
+            {editingCommentId === comment.id ? (
+                <>
+                    <input
+                        type="text"
+                        value={editingCommentText}
+                        onChange={(e) => setEditingCommentText(e.target.value)}
+                        className="w-full px-2 py-1 border rounded text-sm"
+                    />
+                    <div className="flex gap-2 mt-2">
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleUpdateComment(post.postId, comment.id);
+                            }}
+                            className="text-sm bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
+                        >
+                            Save
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setEditingCommentId(null);
+                                setEditingCommentText("");
+                            }}
+                            className="text-sm bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </>
+            ) : (
+                <>
+                    <p className="text-gray-600 text-sm">{comment.text}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                        {new Date(comment.timestamp).toLocaleString()}
+                    </p>
+                    {comment.author === currentUser.username && (
+                        <div className="flex gap-2 mt-2">
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setEditingCommentId(comment.id);
+                                    setEditingCommentText(comment.text);
+                                }}
+                                className="text-sm text-indigo-600 hover:text-indigo-800"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleDeleteComment(post.postId, comment.id);
+                                }}
+                                className="text-sm text-red-600 hover:text-red-800"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    </div>
+))}
                                             </div>
 
                                             <form
@@ -487,6 +533,8 @@ export const HomePage = () => {
                                     <span className="font-medium">Profile</span>
                                 </Link>
                             </li>
+
+
                             <li>
     <Link
         to="/notifications"
@@ -522,13 +570,13 @@ export const HomePage = () => {
                     </nav>
 
                     <div className="border-t pt-4">
-                        <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors">
+                    <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors">
                             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor">
                                     <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <span className="font-medium">Logout</span>
+                            <span onClick={logoutUser} className="font-medium">Logout</span>
                         </button>
                     </div>
                 </div>
