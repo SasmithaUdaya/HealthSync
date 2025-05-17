@@ -1,65 +1,99 @@
 package backend.service;
 
-
+import backend.dto.request.CommentRequestDTO;
+import backend.dto.response.CommentResponseDTO;
+import backend.exception.PostNotFoundException;
 import backend.model.Comment;
 import backend.model.Notification;
-import backend.model.Post;
 import backend.repository.CommentRepository;
 import backend.repository.PostRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import backend.repository.NotificationRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
-
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
-    @Autowired
-    public CommentService(CommentRepository commentRepository, PostRepository postRepository, NotificationService notificationService) {
-        this.commentRepository = commentRepository;
-        this.postRepository = postRepository;
-        this.notificationService = notificationService;
-    }
-
-    public Comment createComment(Comment comment) {
-        // Save the comment
-        Comment savedComment = commentRepository.save(comment);
-
-        // Fetch the post to get the author ID
-        Post post = postRepository.findById(comment.getPostId()).orElse(null);
-        if (post != null) {
-            String authorId = post.getAuthorId();
-
-            // Create a notification for the post's author
-            Notification notification = new Notification();
-            notification.setUserId(authorId);
-            notification.setMessage("New comment on your post: " + comment.getText());
-            notification.setRead(false);
-            notification.setPostId(comment.getPostId());
-
-            notificationService.createNotification(notification);
+    public CommentResponseDTO createComment(String postId, CommentRequestDTO requestDTO) {
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("Post not found with ID: " + postId);
         }
 
-        return savedComment;
+        Comment comment = Comment.builder()
+                .postId(postId)
+                .text(requestDTO.getText())
+                .author(requestDTO.getAuthor())
+                .timestamp(new Date())
+                .build();
+
+        Comment savedComment = commentRepository.save(comment);
+
+        // Create notification
+        createNotification(postId, "New comment added: " + requestDTO.getText(), savedComment.getId());
+
+        return mapToCommentResponseDTO(savedComment);
     }
 
-    public void deleteComment(String id) {
-        commentRepository.deleteById(id);
+    public List<CommentResponseDTO> getCommentsByPostId(String postId) {
+        if (!postRepository.existsById(postId)) {
+            throw new PostNotFoundException("Post not found with ID: " + postId);
+        }
+
+        return commentRepository.findByPostId(postId).stream()
+                .map(this::mapToCommentResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Comment updateComment(String commentId, String newText) {
+    public CommentResponseDTO updateComment(String postId, String commentId, String text) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
+                .orElseThrow(() -> new PostNotFoundException("Comment not found with ID: " + commentId));
 
-        comment.setText(newText);
-        return commentRepository.save(comment);
+        if (!comment.getPostId().equals(postId)) {
+            throw new IllegalArgumentException("Comment does not belong to the specified post");
+        }
+
+        comment.setText(text);
+        Comment updatedComment = commentRepository.save(comment);
+
+        createNotification(postId, "Comment updated: " + text, commentId);
+
+        return mapToCommentResponseDTO(updatedComment);
     }
 
-    public List<Comment> getCommentsForPost(String postId) {
-        return commentRepository.findByPostId(postId);
+    public void deleteComment(String commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new PostNotFoundException("Comment not found with ID: " + commentId));
+
+        createNotification(comment.getPostId(), "Comment deleted", commentId);
+        commentRepository.delete(comment);
+    }
+
+    private CommentResponseDTO mapToCommentResponseDTO(Comment comment) {
+        return CommentResponseDTO.builder()
+                .id(comment.getId())
+                .postId(comment.getPostId())
+                .text(comment.getText())
+                .author(comment.getAuthor())
+                .timestamp(comment.getTimestamp())
+                .build();
+    }
+
+    private void createNotification(String postId, String message, String commentId) {
+        Notification notification = Notification.builder()
+                .postId(postId)
+                .message(message)
+                .commentId(commentId)
+                .read(false)
+                .timestamp(new Date())
+                .build();
+        notificationRepository.save(notification);
     }
 }

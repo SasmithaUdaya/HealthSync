@@ -1,18 +1,18 @@
 package backend.service;
 
-
 import backend.model.Notification;
+
 import backend.repository.NotificationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
-
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private final NotificationRepository notificationRepository;
 
     public Notification createNotification(Notification notification) {
         return notificationRepository.save(notification);
@@ -30,7 +30,42 @@ public class NotificationService {
         notificationRepository.deleteById(id);
     }
 
-    public List<Notification> getNotificationsByUserId(String userId) {
-        return notificationRepository.findByUserId(userId);
+    public Notification getNotificationById(String id) {
+        return notificationRepository.findById(id).orElse(null);
     }
+
+    public List<Notification> getNotificationsByPostId(String postId) {
+        return notificationRepository.findByPostId(postId);
+    }
+
+    public List<Notification> getNotificationsByCommentId(String commentId) {
+        return notificationRepository.findByCommentId(commentId);
+    }
+
+    public List<Notification> getAllNotifications() {
+        return notificationRepository.findAll();
+    }
+
+    public Notification createLikeNotification(String postId, String recipientId) {
+        Notification notification = Notification.builder()
+                .message("Your post received a like")
+                .read(false)
+                .postId(postId)
+                .recipientId(recipientId) // Add recipient ID
+                .type("LIKE")
+                .build();
+        return notificationRepository.save(notification);
+    }
+
+    public Notification createDislikeNotification(String postId, String recipientId) {
+        Notification notification = Notification.builder()
+                .message("Your post received a dislike")
+                .read(false)
+                .postId(postId)
+                .recipientId(recipientId) // Add recipient ID
+                .type("DISLIKE")
+                .build();
+        return notificationRepository.save(notification);
+    }
+
 }

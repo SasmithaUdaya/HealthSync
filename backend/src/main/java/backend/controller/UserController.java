@@ -1,5 +1,10 @@
 package backend.controller;
 
+import backend.dto.request.LoginRequest;
+import backend.dto.request.RegisterRequest;
+import backend.dto.response.LoginResponse;
+import backend.dto.response.UserResponseDTO;
+import backend.utils.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import backend.model.User;
@@ -10,7 +15,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "*")
 public class UserController {
 
     @Autowired
@@ -18,12 +22,9 @@ public class UserController {
 
     // ✅ Login
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
         try {
-            User user = userService.loginUser(
-                    loginRequest.getEmail(),
-                    loginRequest.getPassword()
-            );
+            ApiResponse<LoginResponse> user = userService.loginUser(loginRequest);
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity
@@ -34,19 +35,13 @@ public class UserController {
 
     // ✅ Register
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        try {
-            User registeredUser = userService.registerUser(user);
+    public ResponseEntity<ApiResponse<LoginResponse>> registerUser(@RequestBody RegisterRequest request) {
+            ApiResponse<LoginResponse> registeredUser = userService.registerUser(request);
             return ResponseEntity.ok(registeredUser);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Registration failed: " + e.getMessage());
-        }
     }
 
     // ✅ Update interests
-    @PostMapping("/{userId}/interests")
+    @PostMapping("/interests/{userId}")
     public ResponseEntity<?> updateUserInterests(
             @PathVariable String userId,
             @RequestBody List<String> interests) {
@@ -97,6 +92,12 @@ public class UserController {
         } else {
             return ResponseEntity.badRequest().body("User not found.");
         }
+    }
+
+    @GetMapping("getall-users")
+    public ResponseEntity<?> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     // ✅ Get suggested users based on shared interests

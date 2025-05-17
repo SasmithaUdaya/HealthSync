@@ -5,18 +5,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Date;
 
-
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class UserResponseDTO {
+public class CommentResponseDTO {
     private String id;
-    private String username;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private List<String> interests;
+    private String postId;
+    private String text;
+    private String author;
+    private Date timestamp;
 }

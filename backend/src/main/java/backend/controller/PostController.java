@@ -1,6 +1,5 @@
 package backend.controller;
 
-
 import backend.dto.request.PostRequestDTO;
 import backend.dto.response.PostResponseDTO;
 import backend.exception.PostNotFoundException;
@@ -24,27 +23,24 @@ import java.nio.file.Paths;
 @Slf4j
 @RequestMapping("/post")
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
-    //create crud operation
+    // create crud operation
 
     @Autowired
     private PostService postService;
 
-    //create inserting part
+    // create inserting part
 
-    @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO) {
+    @PostMapping("/create/{id}")
+    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO,
+            @PathVariable String id) {
         // Get authenticated user (if needed)
 
-        PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO);
+        PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO, id);
         return ResponseEntity.ok(postResponseDTO);
     }
 
-
-
-    @PostMapping(value = "/postimage",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/postimage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String postImage(@RequestParam("file") MultipartFile file) {
         // Set the correct path to the uploads folder
         String folder = "D:/HealthSync/backend/src/main/uploads/";
@@ -71,8 +67,6 @@ public class PostController {
         return postImage;
     }
 
-
-
     // Read - Get all posts
     @GetMapping("/getposts")
     public ResponseEntity<?> getAllPosts() {
@@ -90,7 +84,13 @@ public class PostController {
         return ResponseEntity.ok(post);
     }
 
+    @GetMapping("/getpostwithcomments/{id}")
+    public ResponseEntity<PostResponseDTO> getPostWithComments(@PathVariable String id) {
+        return ResponseEntity.ok(postService.getPostById(id)); // This will include comments
+    }
+
     private final String UPLOAD_DIR = "D:/HealthSync/backend/src/main/uploads/";
+
     @GetMapping("/uploads/{filename}")
     public ResponseEntity<FileSystemResource> getImage(@PathVariable String filename) {
         File file = new File(UPLOAD_DIR + filename);
@@ -104,8 +104,7 @@ public class PostController {
     public ResponseEntity<Post> updatePost(
             @PathVariable String id,
             @RequestPart(value = "file", required = false) MultipartFile imageFile,
-            @RequestPart(value = "postDetails") String postDetailsJson
-    ) throws IOException {
+            @RequestPart(value = "postDetails") String postDetailsJson) throws IOException {
 
         // Manually convert JSON string into Post object
         ObjectMapper objectMapper = new ObjectMapper();
@@ -114,7 +113,6 @@ public class PostController {
         Post updatedPost = postService.updatePost(id, postDetails, imageFile);
         return ResponseEntity.ok(updatedPost);
     }
-
 
     @DeleteMapping("delete/{id}")
     public ResponseEntity<String> deletePost(@PathVariable String id) {
@@ -125,11 +123,5 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
         }
     }
-
-
-
-
-
-
 
 }

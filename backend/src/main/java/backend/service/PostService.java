@@ -1,12 +1,18 @@
 package backend.service;
 
 import backend.dto.request.PostRequestDTO;
+import backend.dto.response.CommentResponseDTO;
 import backend.dto.response.PostResponseDTO;
+import backend.model.Comment;
 import backend.model.Post;
+import backend.model.User;
 import backend.repository.PostRepository;
+import backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import backend.repository.CommentRepository;
+import backend.repository.LikeDislikeRepository;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,20 +27,45 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
-    //private Object Collectors;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
-    public PostResponseDTO createPost(PostRequestDTO requestDTO) {
-        try{
-            Post newPost =  Post.builder()
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private LikeDislikeService likeDislikeService;
+
+    public PostResponseDTO createPost(PostRequestDTO requestDTO, String authorId) {
+        try {
+
+            // TODO: validate author is registered
+            // check authid
+            // Validate that the author exists
+            // Optional<User> authorOptional =
+            // UserRepository.findById(requestDTO.getAuthorId());
+            // if (!authorOptional.isPresent()) {
+            // throw new IllegalArgumentException("Author with ID " +
+            // requestDTO.getAuthorId() + " does not exist.");
+            // }
+            Post newPost = Post.builder() // update with authid
                     .reference(requestDTO.getReference())
+                    .authorId(authorId)
                     .postCategory(requestDTO.getPostCategory())
                     .description(requestDTO.getDescription())
                     .focus(requestDTO.getFocus())
                     .duration(requestDTO.getDuration())
                     .postImage(requestDTO.getPostImage())
                     .build();
+
             // Save the new post to the database
-             postRepository.save(newPost);
+            Post savedPost = postRepository.save(newPost);
+
+            // Create notification for new post
+            // createPostNotification(savedPost.getPostId(), "New post created: " +
+            // savedPost.getDescription(), authorId);
 
             // Create a response DTO
             PostResponseDTO responseDTO = new PostResponseDTO();
@@ -44,8 +75,12 @@ public class PostService {
             responseDTO.setDescription(newPost.getDescription());
             responseDTO.setFocus(newPost.getFocus());
             responseDTO.setDuration(newPost.getDuration());
+            responseDTO.setAuthorId(newPost.getAuthorId());
             responseDTO.setPostImage(newPost.getPostImage());
-
+            // responseDTO.setAuthorUsername(author.getUsername());
+            responseDTO.setComments(List.of());
+            responseDTO.setLikes(0);
+            responseDTO.setDislikes(0);
 
             return responseDTO;
         } catch (Exception e) {
@@ -58,14 +93,24 @@ public class PostService {
         List<Post> posts = postRepository.findAll();
 
         return posts.stream().map(post -> {
+
+            User author = userRepository.findById(post.getAuthorId())
+                    .orElseThrow(() -> new RuntimeException("Author not found with ID: " + post.getAuthorId()));
+
             PostResponseDTO dto = new PostResponseDTO();
             dto.setPostId(post.getPostId());
             dto.setReference(post.getReference());
+            dto.setAuthorId(post.getAuthorId());
             dto.setPostCategory(post.getPostCategory());
             dto.setDescription(post.getDescription());
             dto.setFocus(post.getFocus());
             dto.setDuration(post.getDuration());
+            dto.setAuthorId(author.getId());
+            dto.setAuthorUsername(author.getUsername());
             dto.setPostImage(post.getPostImage());
+            dto.setComments(commentService.getCommentsByPostId(post.getPostId()));
+            dto.setLikes(likeDislikeService.getLikes(post.getPostId()));
+            dto.setDislikes(likeDislikeService.getDislikes(post.getPostId()));
             return dto;
         }).collect(Collectors.toList());
     }
@@ -82,6 +127,9 @@ public class PostService {
         dto.setFocus(post.getFocus());
         dto.setDuration(post.getDuration());
         dto.setPostImage(post.getPostImage());
+        dto.setComments(commentService.getCommentsByPostId(post.getPostId()));
+        dto.setLikes(likeDislikeService.getLikes(post.getPostId()));
+        dto.setDislikes(likeDislikeService.getDislikes(post.getPostId()));
         return dto;
     }
 
@@ -104,8 +152,7 @@ public class PostService {
             Files.write(filePath, imageFile.getBytes());
 
             existingPost.setPostImage(originalFilename);
-        }
-        else{
+        } else {
             System.out.println("no file uploaded");
         }
 
@@ -133,7 +180,36 @@ public class PostService {
         return false;
     }
 
+    public PostResponseDTO getPostWithComments(String postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with ID: " + postId));
 
+        User author = userRepository.findById(post.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found with ID: " + post.getAuthorId()));
 
+        List<CommentResponseDTO> commentDTOs = commentRepository.findByPostId(postId).stream()
+                .map(comment -> CommentResponseDTO.builder()
+                        .id(comment.getId())
+                        .postId(comment.getPostId())
+                        .text(comment.getText())
+                        .author(comment.getAuthor())
+                        .timestamp(comment.getTimestamp())
+                        .build())
+                .collect(Collectors.toList());
 
+        PostResponseDTO responseDTO = new PostResponseDTO();
+        responseDTO.setPostId(post.getPostId());
+        responseDTO.setPostCategory(post.getPostCategory());
+        responseDTO.setDescription(post.getDescription());
+        responseDTO.setFocus(post.getFocus());
+        responseDTO.setDuration(post.getDuration());
+        responseDTO.setPostImage(post.getPostImage());
+        responseDTO.setAuthorId(author.getId());
+        responseDTO.setAuthorUsername(author.getUsername());
+        responseDTO.setComments(commentDTOs);
+        responseDTO.setLikes(likeDislikeService.getLikes(postId));
+        responseDTO.setDislikes(likeDislikeService.getDislikes(postId));
+
+        return responseDTO;
+    }
 }

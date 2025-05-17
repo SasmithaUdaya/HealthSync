@@ -1,12 +1,18 @@
 package backend.service;
 
+import backend.dto.request.LoginRequest;
+import backend.dto.request.RegisterRequest;
+import backend.dto.response.LoginResponse;
+import backend.dto.response.UserResponseDTO;
 import backend.model.User;
+import backend.utils.ApiResponse;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
 
-    User registerUser(User user);
+    ApiResponse<LoginResponse> registerUser(RegisterRequest request);
 
     User updateUser(String userId, User updatedUser);
 
@@ -21,5 +27,7 @@ public interface UserService {
 
 
     // ✅ New: Login method
-    User loginUser(String email, String password);
+    ApiResponse<LoginResponse> loginUser(LoginRequest loginRequest);
+
+    List<UserResponseDTO> getAllUsers();
 }
