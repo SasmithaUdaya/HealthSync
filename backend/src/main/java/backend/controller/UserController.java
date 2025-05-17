@@ -3,6 +3,7 @@ package backend.controller;
 import backend.dto.request.LoginRequest;
 import backend.dto.request.RegisterRequest;
 import backend.dto.response.LoginResponse;
+import backend.dto.response.UserResponseDTO;
 import backend.utils.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,19 +35,13 @@ public class UserController {
 
     // ✅ Register
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
-        try {
-            ApiResponse<String> registeredUser = userService.registerUser(request);
+    public ResponseEntity<ApiResponse<LoginResponse>> registerUser(@RequestBody RegisterRequest request) {
+            ApiResponse<LoginResponse> registeredUser = userService.registerUser(request);
             return ResponseEntity.ok(registeredUser);
-        } catch (Exception e) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Registration failed: " + e.getMessage());
-        }
     }
 
     // ✅ Update interests
-    @PostMapping("/{userId}/interests")
+    @PostMapping("/interests/{userId}")
     public ResponseEntity<?> updateUserInterests(
             @PathVariable String userId,
             @RequestBody List<String> interests) {
@@ -97,6 +92,12 @@ public class UserController {
         } else {
             return ResponseEntity.badRequest().body("User not found.");
         }
+    }
+
+    @GetMapping("getall-users")
+    public ResponseEntity<?> getAllUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
     }
 
     // ✅ Get suggested users based on shared interests

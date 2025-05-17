@@ -11,9 +11,8 @@ public class PostRequestDTO {
     private String focus;
     private String duration;
     private String postImage;
-    //authorId is not included in the request DTO as it will be set by the server
-
-
+    //private String authorId;
+    //authorId is not included in the request DTO as it will be set by the serve
 }
 
 

@@ -1,27 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/api.js";
+import { useAuth } from "../contexts/auth-context..jsx";
 
 const AddPost = () => {
     const navigate = useNavigate();
     const [post, setPost] = useState({
-        postCategory: '',
-        reference: '',
-        focus: '',
-        description: '',
-        duration: '',
-        postImage: null
+        postCategory: "",
+        reference: "",
+        focus: "",
+        description: "",
+        duration: "",
+        postImage: null,
     });
-    const [preview, setPreview] = useState('');
+    const [preview, setPreview] = useState("");
 
     const categories = [
         "Nutrition and diet planning",
         "Sleep and recovery",
-        "Health and natural remedees",
+        "Health and natural remedies",
         "Fitness and training program",
-        "Brain and mental wellness"
+        "Brain and mental wellness",
     ];
 
+    const { currentUser } = useAuth(); // Include accessToken for authentication
+
+    // Handle input changes, including file upload with preview
     const onInputChange = (e) => {
         if (e.target.name === "postImage") {
             const file = e.target.files[0];
@@ -31,44 +35,61 @@ const AddPost = () => {
             reader.onloadend = () => {
                 setPreview(reader.result);
             };
-            reader.readAsDataURL(file);
+            if (file) reader.readAsDataURL(file); // Only read if file exists
         } else {
             setPost({ ...post, [e.target.name]: e.target.value });
         }
     };
 
+    // Handle form submission
     const onSubmit = async (e) => {
         e.preventDefault();
-        const formData = new FormData();
-        formData.append("file", post.postImage);
 
-        let imageName = "";
-
-        try {
-            const res = await axios.post("http://localhost:8081/post/postimage", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            imageName = res.data;
-            // redirect after success
-            navigate('/');
-        } catch (error) {
-            alert("Error uploading image");
+        // Validate user is logged in
+        if (!currentUser || !currentUser.id) {
+            alert("Please log in to create a post.");
+            navigate("/login");
             return;
         }
 
+        let imageName = "";
+
+        // Step 1: Upload the image if it exists
+        if (post.postImage) {
+            const formData = new FormData();
+            formData.append("file", post.postImage);
+
+            try {
+                const res = await api.post("/post/postimage", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+                imageName = res.data;
+            } catch (error) {
+                alert("Error uploading image: " + (error.response?.data?.message || error.message));
+                return;
+            }
+        }
+
+        // Step 2: Create the post with userId and imageName
         const updatedPost = {
-            ...post,
-            postImage: imageName
+            authorId: currentUser.id, // Add userId from currentUser
+            postCategory: post.postCategory,
+            reference: post.reference,
+            focus: post.focus,
+            description: post.description,
+            duration: post.duration,
+            postImage: imageName || "", // Use empty string if no image
         };
 
         try {
-            await axios.post("http://localhost:8081/post/create", updatedPost);
+            await api.post(`/post/create/${currentUser.id}`, updatedPost);
             alert("Post added successfully!");
-            window.location.reload();
-        } catch (err) {
-            alert("Error adding post");
+            navigate("/home"); // Navigate instead of reload for better UX
+        } catch (error) {
+            alert("Error adding post: " + (error.response?.data?.message || error.message));
+            console.error("Error:", error);
         }
     };
 
@@ -147,7 +168,6 @@ const AddPost = () => {
                                         onChange={onInputChange}
                                         placeholder="https://youtube.com/..."
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-                                        required
                                     />
                                 </div>
                             </div>

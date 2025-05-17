@@ -1,5 +1,4 @@
 package backend.service.impl;
-
 import backend.dto.request.LoginRequest;
 import backend.dto.request.RegisterRequest;
 import backend.dto.response.LoginResponse;
@@ -43,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public ApiResponse<String> registerUser(RegisterRequest request) {
+    public ApiResponse<LoginResponse> registerUser(RegisterRequest request) {
         try {
             if (userRepository.existsByEmail(request.getEmail())) {
                 return ApiResponse.errorResponse("Email address already in use.");
@@ -56,10 +55,28 @@ public class UserServiceImpl implements UserService {
             user.setPassword(hashedPassword);
             user.setFirstName(request.getFirstName());
             user.setLastName(request.getLastName());
+            user.setUsername(request.getUsername());
+            user.setInterests(request.getInterests());
 
             // Save user once
             User savedUser = userRepository.save(user);
-            return ApiResponse.successResponse("User Registered Successfully", jwtUtils.generateToken(savedUser.getEmail()));
+
+            String token = jwtUtils.generateToken(savedUser.getUsername());
+
+            LoginResponse loginResponse = LoginResponse.builder()
+                    .accessToken(token)
+                    .user(UserResponseDTO.builder()
+                            .id(savedUser.getId())
+                            .email(savedUser.getEmail())
+                            .firstName(savedUser.getFirstName())
+                            .lastName(savedUser.getLastName())
+                            .username(savedUser.getUsername())
+                            .interests(savedUser.getInterests())
+                            .build())
+                    .build();
+
+
+            return ApiResponse.successResponse("User Registered Successfully", loginResponse);
         } catch (Exception e) {
             log.error("Error registering user: {}", e.getMessage(), e);
             return ApiResponse.errorResponse("Registration failed. Please try again later.");
@@ -111,6 +128,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getUserById(String userId) {
         return userRepository.findById(userId);
+    }
+
+    // Get all users
+    public List<UserResponseDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(user -> new UserResponseDTO(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getUsername(),
+                        user.getInterests()
+                ))
+                .collect(Collectors.toList());
     }
 
     // ✅ Get Suggested Users based on Interests
@@ -168,6 +200,7 @@ public class UserServiceImpl implements UserService {
                             .firstName(user.getFirstName())
                             .lastName(user.getLastName())
                             .username(user.getUsername())
+                            .interests(user.getInterests())
                             .build())
                     .build();
             return ApiResponse.successResponse("User Login Successfully", loginResponse);

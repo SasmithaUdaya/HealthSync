@@ -18,8 +18,5 @@ public class UserResponseDTO {
     private String email;
     private String firstName;
     private String lastName;
-   /* private List<String> postIds;
-    private List<String> commentIds;
-    private List<String> likeIds;
-    private List<String> notificationIds;*/
+    private List<String> interests;
 }

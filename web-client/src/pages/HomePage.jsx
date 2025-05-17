@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+
+import {useAuth} from "../contexts/auth-context..jsx";
+import api from "../api/api.js";
 
 export const HomePage = () => {
     const [posts, setPosts] = useState([]);
@@ -11,6 +13,7 @@ export const HomePage = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingCommentText, setEditingCommentText] = useState("");
 
+    const { currentUser, logoutUser } = useAuth();
 
     const filteredData = useMemo(() => {
         if (!searchParam) return posts;
@@ -26,7 +29,8 @@ export const HomePage = () => {
 
     const loadPosts = async () => {
         try {
-            const result = await axios.get("http://localhost:8081/post/getposts");
+            // Add the Authorization header here
+            const result = await api.get("/post/getposts", );
             setPosts(result.data);
         } catch (error) {
             console.error("Error fetching posts", error);
@@ -41,7 +45,7 @@ export const HomePage = () => {
         const confirmation = window.confirm("Are you sure you want to delete this post?");
         if (confirmation) {
             try {
-                await axios.delete(`http://localhost:8081/post/delete/${id}`);
+                await api.delete(`/post/delete/${id}`);
                 await loadPosts();
             } catch (error) {
                 console.error("Error deleting post", error);
@@ -56,7 +60,7 @@ export const HomePage = () => {
     const handleCommentSubmit = async (e, postId) => {
         e.preventDefault();
         try {
-            await axios.post(`http://localhost:8081/posts/${postId}/comments`, {
+            await api.post(`/posts/${postId}/comments`, {
                 text: newComment,
                 author: "Current User"
             });
@@ -70,7 +74,7 @@ export const HomePage = () => {
     const handleUpdateComment = async (postId, commentId) => {
         try {
 
-            await axios.put(`http://localhost:8081/posts/${postId}/comments/${commentId}`, {
+            await api.put(`/posts/${postId}/comments/${commentId}`, {
                 text: editingCommentText,
             });
             setEditingCommentId(null);
@@ -85,7 +89,7 @@ export const HomePage = () => {
         const confirmation = window.confirm("Are you sure you want to delete this comment?");
         if (confirmation) {
             try {
-                await axios.delete(`http://localhost:8081/posts/${postId}/comments/${commentId}`);
+                await api.delete(`/posts/${postId}/comments/${commentId}`);
                 await loadPosts();
             } catch (error) {
                 console.error("Error deleting comment:", error);
@@ -101,6 +105,10 @@ export const HomePage = () => {
         navigate(`/post/${postId}`);
     };
 
+    // const goToLearningPlan = () => {
+    //     navigate(`/learning-plan/${currentUser.id}`);
+    // };
+
     return (
         <div className="min-h-screen bg-gray-50 flex">
             <div className="flex-1 mr-64">
@@ -108,7 +116,7 @@ export const HomePage = () => {
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">HealthSync Platform</h1>
                     <div className="w-full max-w-lg">
                         <button
-                            onClick={() => navigate('/addpost')}
+                            onClick={() => navigate(`/addpost/${currentUser.id}`)}
                             className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,8 +140,8 @@ export const HomePage = () => {
                 </div>
 
                 <div className="max-w-lg mx-auto py-6 px-4">
-                    {filteredData.length > 0 ? (
-                        filteredData.map((post) => (
+                    {filteredData?.length > 0 ? (
+                        filteredData?.map((post) => (
                             <div
                                 key={post.postId}
                                 onClick={(e) => handlePostClick(e, post.postId)}
@@ -144,7 +152,7 @@ export const HomePage = () => {
                                         <span className="text-indigo-600 text-sm font-medium">{post.postId?.charAt(0) || 'U'}</span>
                                     </div>
                                     <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-700">{post.postId || "Unknown User"}</p>
+                                        <p className="text-sm font-medium text-gray-700">{post.authorUsername || "Unknown User"}</p>
                                         <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
                                     </div>
                                 </div>
@@ -183,6 +191,8 @@ export const HomePage = () => {
                                             >
                                                 Comments
                                             </button>
+                                            {post.authorId === currentUser.id && (
+                                                <div className="flex space-x-4">
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -203,6 +213,8 @@ export const HomePage = () => {
                                             >
                                                 Delete
                                             </button>
+                                        </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -254,7 +266,7 @@ export const HomePage = () => {
                                                                     <p className="text-xs text-gray-400 mt-1">
                                                                         {new Date(comment.timestamp).toLocaleString()}
                                                                     </p>
-                                                                    {comment.author === "Current User" && (
+                                                                    {currentUser?.id === post.userId && (
                                                                         <div className="flex gap-2 mt-2">
                                                                             <button
                                                                                 onClick={(e) => {
@@ -354,7 +366,7 @@ export const HomePage = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/learning-plans"
+                                    to="/learningplans"
                                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 transition-colors"
                                 >
                                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -362,7 +374,9 @@ export const HomePage = () => {
                                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                                         </svg>
                                     </div>
-                                    <span className="font-medium">Learning Plans</span>
+                                    <button >
+                                        <span className="font-medium">Learning Plans</span>
+                                    </button>
                                 </Link>
                             </li>
                             <li>
@@ -388,7 +402,7 @@ export const HomePage = () => {
                                     <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <span className="font-medium">Logout</span>
+                            <span onClick={logoutUser} className="font-medium">Logout</span>
                         </button>
                     </div>
                 </div>

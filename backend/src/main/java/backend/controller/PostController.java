@@ -5,7 +5,6 @@ import backend.dto.request.PostRequestDTO;
 import backend.dto.response.PostResponseDTO;
 import backend.exception.PostNotFoundException;
 import backend.model.Post;
-import backend.repository.PostRepository;
 import backend.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import java.nio.file.Paths;
 @Slf4j
 @RequestMapping("/post")
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
     //create crud operation
 
@@ -33,11 +31,11 @@ public class PostController {
 
     //create inserting part
 
-    @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO) {
+    @PostMapping("/create/{id}")
+    public ResponseEntity<PostResponseDTO> newPostModel(@RequestBody PostRequestDTO postRequestDTO, @PathVariable String id) {
         // Get authenticated user (if needed)
 
-        PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO);
+        PostResponseDTO postResponseDTO = postService.createPost(postRequestDTO, id);
         return ResponseEntity.ok(postResponseDTO);
     }
 

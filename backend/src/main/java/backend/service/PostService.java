@@ -3,7 +3,9 @@ package backend.service;
 import backend.dto.request.PostRequestDTO;
 import backend.dto.response.PostResponseDTO;
 import backend.model.Post;
+import backend.model.User;
 import backend.repository.PostRepository;
+import backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,13 +23,24 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private UserRepository userRepository;
     //private Object Collectors;
 
-    public PostResponseDTO createPost(PostRequestDTO requestDTO) {
+    public PostResponseDTO createPost(PostRequestDTO requestDTO, String authorId) {
         try{
+
+
+            //TODO: validate author is registered
             //check authid
+            // Validate that the author exists
+//            Optional<User> authorOptional = UserRepository.findById(requestDTO.getAuthorId());
+//            if (!authorOptional.isPresent()) {
+//                throw new IllegalArgumentException("Author with ID " + requestDTO.getAuthorId() + " does not exist.");
+//            }
             Post newPost =  Post.builder() //update with authid
                     .reference(requestDTO.getReference())
+                    .authorId(authorId)
                     .postCategory(requestDTO.getPostCategory())
                     .description(requestDTO.getDescription())
                     .focus(requestDTO.getFocus())
@@ -46,6 +59,7 @@ public class PostService {
             responseDTO.setDescription(newPost.getDescription());
             responseDTO.setFocus(newPost.getFocus());
             responseDTO.setDuration(newPost.getDuration());
+            responseDTO.setAuthorId(newPost.getAuthorId());
             responseDTO.setPostImage(newPost.getPostImage());
 
 
@@ -60,13 +74,20 @@ public class PostService {
         List<Post> posts = postRepository.findAll();
 
         return posts.stream().map(post -> {
+
+            User author = userRepository.findById(post.getAuthorId())
+                    .orElseThrow(() -> new RuntimeException("Author not found with ID: " + post.getAuthorId()));
+
             PostResponseDTO dto = new PostResponseDTO();
             dto.setPostId(post.getPostId());
             dto.setReference(post.getReference());
+            dto.setAuthorId( post.getAuthorId());
             dto.setPostCategory(post.getPostCategory());
             dto.setDescription(post.getDescription());
             dto.setFocus(post.getFocus());
             dto.setDuration(post.getDuration());
+            dto.setAuthorId(author.getId());
+            dto.setAuthorUsername(author.getUsername());
             dto.setPostImage(post.getPostImage());
             return dto;
         }).collect(Collectors.toList());
