@@ -9,8 +9,12 @@ import LoginPage from "../pages/LoginPage.jsx";
 import SelectInterestsPage from "../pages/SelectInterestsPage.jsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import Notifications from "../component/Notifications.jsx";
-
-
+/*
+import Ai_feech from "../component/Ai_feech.jsx";  // Make sure to import Ai_feech
+ */
+import LearningPlan from "../pages/LearningPlan.jsx";
+import ViewLearningPlan from "../pages/ViewLearningPlan.jsx";
+import UpdateLearningPlan from "../pages/UpdateLearningPlan.jsx";
 
 
 
@@ -41,7 +45,10 @@ const AppRouting = () => {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/select-interests/:userId" element={<SelectInterestsPage />} />
                 <Route path="/notifications" element={<Notifications />} />
-                {/*<Route path="/ai-feech" element={<Ai_feech />} />*/}
+             {/*    <Route path="/ai-feech" element={<Ai_feech />} /> */}
+                 <Route path="/learning-plan/:id" element={<LearningPlan />} />
+                                <Route path="/learningplans" element={<ViewLearningPlan />} />
+                                <Route path="/learningplans/update/:id" element={<UpdateLearningPlan />} />
             </Routes>
         //</BrowserRouter>
     );
