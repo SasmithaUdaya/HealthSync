@@ -1,8 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useMemo, useState } from "react";
-
-import {useAuth} from "../contexts/auth-context..jsx";
-import api from "../api/api.js";
+import axios from "axios";
 
 export const HomePage = () => {
     const [posts, setPosts] = useState([]);
@@ -13,8 +11,6 @@ export const HomePage = () => {
     const [editingCommentId, setEditingCommentId] = useState(null);
     const [editingCommentText, setEditingCommentText] = useState("");
 
-    const { currentUser, logoutUser } = useAuth();
-
     const filteredData = useMemo(() => {
         if (!searchParam) return posts;
         return posts.filter(post =>
@@ -24,14 +20,34 @@ export const HomePage = () => {
     }, [posts, searchParam]);
 
     useEffect(() => {
-        loadPosts().then();
+        loadPosts();
     }, []);
 
     const loadPosts = async () => {
         try {
-            // Add the Authorization header here
-            const result = await api.get("/post/getposts", );
-            setPosts(result.data);
+            const result = await axios.get("http://localhost:8081/post/getposts");
+            // For each post, fetch like/dislike counts
+            const postsWithLikes = await Promise.all(
+                result.data.map(async post => {
+                    try {
+                        const likesRes = await axios.get(`http://localhost:8081/api/posts/${post.postId}/likes`);
+                        const dislikesRes = await axios.get(`http://localhost:8081/api/posts/${post.postId}/dislikes`);
+                        return {
+                            ...post,
+                            likes: likesRes.data,
+                            dislikes: dislikesRes.data
+                        };
+                    } catch (error) {
+                        console.error("Error fetching like counts:", error);
+                        return {
+                            ...post,
+                            likes: 0,
+                            dislikes: 0
+                        };
+                    }
+                })
+            );
+            setPosts(postsWithLikes);
         } catch (error) {
             console.error("Error fetching posts", error);
         }
@@ -45,8 +61,8 @@ export const HomePage = () => {
         const confirmation = window.confirm("Are you sure you want to delete this post?");
         if (confirmation) {
             try {
-                await api.delete(`/post/delete/${id}`);
-                await loadPosts();
+                await axios.delete(`http://localhost:8081/post/delete/${id}`);
+                loadPosts();
             } catch (error) {
                 console.error("Error deleting post", error);
             }
@@ -60,12 +76,12 @@ export const HomePage = () => {
     const handleCommentSubmit = async (e, postId) => {
         e.preventDefault();
         try {
-            await api.post(`/posts/${postId}/comments`, {
+            await axios.post(`http://localhost:8081/posts/${postId}/comments`, {
                 text: newComment,
                 author: "Current User"
             });
             setNewComment("");
-            await loadPosts();
+            loadPosts();
         } catch (error) {
             console.error("Error submitting comment:", error);
         }
@@ -73,13 +89,12 @@ export const HomePage = () => {
 
     const handleUpdateComment = async (postId, commentId) => {
         try {
-
-            await api.put(`/posts/${postId}/comments/${commentId}`, {
+            await axios.put(`http://localhost:8081/posts/${postId}/comments/${commentId}`, {
                 text: editingCommentText,
             });
             setEditingCommentId(null);
             setEditingCommentText("");
-            await loadPosts();
+            loadPosts();
         } catch (error) {
             console.error("Error updating comment:", error);
         }
@@ -89,8 +104,8 @@ export const HomePage = () => {
         const confirmation = window.confirm("Are you sure you want to delete this comment?");
         if (confirmation) {
             try {
-                await api.delete(`/posts/${postId}/comments/${commentId}`);
-                await loadPosts();
+                await axios.delete(`http://localhost:8081/posts/${postId}/comments/${commentId}`);
+                loadPosts();
             } catch (error) {
                 console.error("Error deleting comment:", error);
             }
@@ -104,10 +119,65 @@ export const HomePage = () => {
         }
         navigate(`/post/${postId}`);
     };
+    
+    
 
-    // const goToLearningPlan = () => {
-    //     navigate(`/learning-plan/${currentUser.id}`);
-    // };
+    const handleLike = async (postId, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await axios.post(`http://localhost:8081/api/posts/${postId}/like`);
+            // Optimistically update the UI
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post.postId === postId 
+                        ? { ...post, likes: (post.likes || 0) + 1 } 
+                        : post
+                )
+            );
+        } catch (error) {
+            console.error("Error liking post:", error);
+            // Revert the optimistic update if the request fails
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post.postId === postId 
+                        ? { ...post, likes: (post.likes || 0) - 1 } 
+                        : post
+                )
+            );
+        }
+    };
+    
+    const handleDislike = async (postId, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await axios.post(`http://localhost:8081/api/posts/${postId}/dislike`);
+            // Optimistically update the UI
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post.postId === postId 
+                        ? { ...post, dislikes: (post.dislikes || 0) + 1 } 
+                        : post
+                )
+            );
+        } catch (error) {
+            console.error("Error disliking post:", error);
+            // Revert the optimistic update if the request fails
+            setPosts(prevPosts => 
+                prevPosts.map(post => 
+                    post.postId === postId 
+                        ? { ...post, dislikes: (post.dislikes || 0) - 1 } 
+                        : post
+                )
+            );
+        }
+    };
+
+
+    
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -116,7 +186,7 @@ export const HomePage = () => {
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">HealthSync Platform</h1>
                     <div className="w-full max-w-lg">
                         <button
-                            onClick={() => navigate(`/addpost/${currentUser.id}`)}
+                            onClick={() => navigate('/addpost')}
                             className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -140,8 +210,8 @@ export const HomePage = () => {
                 </div>
 
                 <div className="max-w-lg mx-auto py-6 px-4">
-                    {filteredData?.length > 0 ? (
-                        filteredData?.map((post) => (
+                    {filteredData.length > 0 ? (
+                        filteredData.map((post) => (
                             <div
                                 key={post.postId}
                                 onClick={(e) => handlePostClick(e, post.postId)}
@@ -152,7 +222,7 @@ export const HomePage = () => {
                                         <span className="text-indigo-600 text-sm font-medium">{post.postId?.charAt(0) || 'U'}</span>
                                     </div>
                                     <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-700">{post.authorUsername || "Unknown User"}</p>
+                                        <p className="text-sm font-medium text-gray-700">{post.postId || "Unknown User"}</p>
                                         <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p>
                                     </div>
                                 </div>
@@ -178,9 +248,40 @@ export const HomePage = () => {
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex gap-4 text-sm text-gray-600">
                                             <span>💬 {post.comments?.length || 0}</span>
-                                            <span>❤️ {post.likes || 0}</span>
+                                            <span 
+                        onClick={(e) => handleLike(post.postId, e)}
+                        className={`cursor-pointer ${post.isLiked ? 'text-green-600 font-bold' : 'text-gray-600'}`}
+                    >
+                        👍 {post.likes || 0}
+                    </span>
+                    <span 
+                        onClick={(e) => handleDislike(post.postId, e)}
+                        className={`cursor-pointer ${post.isDisliked ? 'text-red-600 font-bold' : 'text-gray-600'}`}
+                    >
+                        👎 {post.dislikes || 0}
+                    </span>
                                         </div>
+
+                                                        
                                         <div className="flex gap-4">
+                                     
+                                        {/* 
+<button
+    onClick={(e) => handleLike(post.postId, e)}
+    className="text-green-600 hover:text-green-800 text-sm"
+>
+    👍 Like
+</button>
+<button
+    onClick={(e) => handleDislike(post.postId, e)}
+    className="text-yellow-600 hover:text-yellow-800 text-sm"
+>
+    👎 Dislike
+</button>
+*/}
+
+                
+
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -191,8 +292,6 @@ export const HomePage = () => {
                                             >
                                                 Comments
                                             </button>
-                                            {post.authorId === currentUser.id && (
-                                                <div className="flex space-x-4">
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault();
@@ -207,14 +306,12 @@ export const HomePage = () => {
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    deletePost(post.postId).then();
+                                                    deletePost(post.postId);
                                                 }}
                                                 className="text-red-600 hover:text-red-800 text-sm"
                                             >
                                                 Delete
                                             </button>
-                                        </div>
-                                            )}
                                         </div>
                                     </div>
 
@@ -241,7 +338,7 @@ export const HomePage = () => {
                                                                             onClick={(e) => {
                                                                                 e.preventDefault();
                                                                                 e.stopPropagation();
-                                                                                handleUpdateComment(post.postId, comment.id).then();
+                                                                                handleUpdateComment(post.postId, comment.id);
                                                                             }}
                                                                             className="text-sm bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700"
                                                                         >
@@ -266,7 +363,7 @@ export const HomePage = () => {
                                                                     <p className="text-xs text-gray-400 mt-1">
                                                                         {new Date(comment.timestamp).toLocaleString()}
                                                                     </p>
-                                                                    {currentUser?.id === post.userId && (
+                                                                    {comment.author === "Current User" && (
                                                                         <div className="flex gap-2 mt-2">
                                                                             <button
                                                                                 onClick={(e) => {
@@ -283,7 +380,7 @@ export const HomePage = () => {
                                                                                 onClick={(e) => {
                                                                                     e.preventDefault();
                                                                                     e.stopPropagation();
-                                                                                    handleDeleteComment(post.postId, comment.id).then();
+                                                                                    handleDeleteComment(post.postId, comment.id);
                                                                                 }}
                                                                                 className="text-sm text-red-600 hover:text-red-800"
                                                                             >
@@ -303,7 +400,7 @@ export const HomePage = () => {
                                                 onSubmit={(e) => {
                                                     e.preventDefault();
                                                     e.stopPropagation();
-                                                    handleCommentSubmit(e, post.postId).then();
+                                                    handleCommentSubmit(e, post.postId);
                                                 }}
                                             >
                                                 <input
@@ -366,7 +463,7 @@ export const HomePage = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/learningplans"
+                                    to="/learning-plans"
                                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 transition-colors"
                                 >
                                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -374,9 +471,7 @@ export const HomePage = () => {
                                             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
                                         </svg>
                                     </div>
-                                    <button >
-                                        <span className="font-medium">Learning Plans</span>
-                                    </button>
+                                    <span className="font-medium">Learning Plans</span>
                                 </Link>
                             </li>
                             <li>
@@ -392,6 +487,37 @@ export const HomePage = () => {
                                     <span className="font-medium">Profile</span>
                                 </Link>
                             </li>
+                            <li>
+    <Link
+        to="/notifications"
+        className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 transition-colors"
+    >
+        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a6 6 0 00-6 6v2.586l-.707.707A1 1 0 004 13h12a1 1 0 00.707-1.707L16 10.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
+            </svg>
+        </div>
+        <span className="font-medium">Notifications</span>
+    </Link>
+
+    <Link
+    to="/ai-feech" // Update the path to the route for Ai_feech
+    className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 transition-colors"
+>
+    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+        {/* You can choose any icon for the Ai_feech link, here's an example */}
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-600" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a6 6 0 00-6 6v2.586l-.707.707A1 1 0 004 13h12a1 1 0 00.707-1.707L16 10.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
+        </svg>
+    </div>
+    <span className="font-medium">AI Learning Path</span> {/* Change text to something relevant */}
+</Link>
+
+
+
+
+</li>
+
                         </ul>
                     </nav>
 
@@ -402,7 +528,7 @@ export const HomePage = () => {
                                     <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clipRule="evenodd" />
                                 </svg>
                             </div>
-                            <span onClick={logoutUser} className="font-medium">Logout</span>
+                            <span className="font-medium">Logout</span>
                         </button>
                     </div>
                 </div>
