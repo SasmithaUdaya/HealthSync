@@ -29,7 +29,6 @@ public class PostService {
     private PostRepository postRepository;
     @Autowired
     private UserRepository userRepository;
-    //private Object Collectors;
     @Autowired
     private CommentRepository commentRepository;
 
@@ -101,6 +100,7 @@ public class PostService {
             PostResponseDTO dto = new PostResponseDTO();
             dto.setPostId(post.getPostId());
             dto.setReference(post.getReference());
+            dto.setAuthorId(post.getAuthorId());
             dto.setPostCategory(post.getPostCategory());
             dto.setDescription(post.getDescription());
             dto.setFocus(post.getFocus());
