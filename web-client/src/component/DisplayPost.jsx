@@ -33,7 +33,7 @@ const DisplayPost = () => {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <Link to="/" className="text-indigo-600 hover:underline">
+                        <Link to="/home" className="text-indigo-600 hover:underline">
                             &larr; Back to Posts
                         </Link>
                     </div>
