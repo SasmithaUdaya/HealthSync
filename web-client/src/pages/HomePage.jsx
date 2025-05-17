@@ -515,7 +515,7 @@ export const HomePage = () => {
                             </li>
                             <li>
                                 <Link
-                                    to="/learning-plans"
+                                    to="/learningplans"
                                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 transition-colors"
                                 >
                                     <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
