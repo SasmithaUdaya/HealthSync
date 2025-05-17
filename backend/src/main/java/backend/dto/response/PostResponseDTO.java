@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-
+import backend.model.Post;
 
 @Data
 @Builder
@@ -26,5 +26,13 @@ public class PostResponseDTO {
     private long likes;
     private long dislikes;
     private List<CommentResponseDTO> comments;
+
+    public List<CommentResponseDTO> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentResponseDTO> comments) {
+        this.comments = comments;
+    }
 
 }
