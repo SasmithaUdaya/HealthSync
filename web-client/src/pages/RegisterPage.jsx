@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import {useAuth} from "../contexts/auth-context..jsx";
+
 import api from "../api/api.js";
 
 
@@ -14,8 +13,6 @@ const RegisterPage = () => {
         email: "",
         password: "",
     });
-
-    const { loginUser } = useAuth();
 
     const navigate = useNavigate();
 

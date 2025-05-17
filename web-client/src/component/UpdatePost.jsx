@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+
+import api from "../api/api.js";
+import {useAuth} from "../contexts/auth-context..jsx";
 
 function UpdatePost() {
     const { id } = useParams();
@@ -15,6 +17,9 @@ function UpdatePost() {
         reference: '',
         postImage: null
     });
+
+     const { currentUser } = useAuth();
+
     const [oldImage, setOldImage] = useState('');
     const [newImagePreview, setNewImagePreview] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -22,24 +27,17 @@ function UpdatePost() {
     const categories = [
         "Nutrition and diet planning",
         "Sleep and recovery",
-        "Health and natural remedees",
+        "Health and natural remedies",
         "Fitness and training program",
-        "Brain and mental wellness"
+        "Brain and mental wellness",
     ];
 
-    const focusOptions = [
-        "Weight Loss",
-        "Muscle Gain",
-        "General Fitness",
-        "Mental Health",
-        "Disease Prevention"
-    ];
 
     useEffect(() => {
         const fetchPost = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`http://localhost:8081/post/getpost/${id}`);
+                const response = await api.get(`/post/getpost/${id}`);
                 setFormData({
                     postId: response.data.postId,
                     postCategory: response.data.postCategory || '',
@@ -57,7 +55,7 @@ function UpdatePost() {
             }
         };
 
-        fetchPost();
+        fetchPost().then();
     }, [id]);
 
     const onInputChange = (e) => {
@@ -96,11 +94,11 @@ function UpdatePost() {
         }
 
         try {
-            await axios.put(`http://localhost:8081/post/posts/${id}`, data, {
+            await api.put(`/post/posts/${id}`, data, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             alert("Post Updated Successfully");
-            navigate("/allposts");
+            navigate("/home");
         } catch (error) {
             console.error("Error updating post", error);
             alert("Error updating post");
@@ -153,17 +151,14 @@ function UpdatePost() {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Focus Area
                                 </label>
-                                <select
+                                <input
+                                    type="text"
                                     name="focus"
                                     value={formData.focus}
                                     onChange={onInputChange}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option value="">Select focus area</option>
-                                    {focusOptions.map((option, index) => (
-                                        <option key={index} value={option}>{option}</option>
-                                    ))}
-                                </select>
+                                    placeholder="Enter focus area"
+                                />
                             </div>
 
                             <div>

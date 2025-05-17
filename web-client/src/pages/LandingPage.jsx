@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-
 import { useNavigate } from "react-router-dom";
 import {useAuth} from "../contexts/auth-context..jsx";
 import api from "../api/api.js";
@@ -13,9 +12,6 @@ const LandingPage = () => {
 
 
 
-    // useEffect(() => {
-    //     loadPosts().then();
-    // }, []);
 
     useEffect(() => {
         const loadPosts = async () => {
@@ -29,15 +25,6 @@ const LandingPage = () => {
 
         loadPosts().then();
     }, [currentUser]);
-
-    // const loadPosts = async () => {
-    //     try {
-    //         const result = await axios.get("http://localhost:8081/post/getposts");
-    //         setPosts(result.data);
-    //     } catch (error) {
-    //         console.error("Error fetching posts", error);
-    //     }
-    // };
 
     const filteredData = useMemo(() => {
         if (!searchParam) return posts;
@@ -66,6 +53,12 @@ const LandingPage = () => {
                         Sign Up
                     </button>
                 </div>)}
+                <button
+                    onClick={() => navigate("/home")}
+                    className="px-4 py-2 bg-white text-indigo-700 border border-indigo-600 rounded hover:bg-indigo-100"
+                >
+                    Home
+                </button>
             </div>
 
             {/* Welcome Message */}

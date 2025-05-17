@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from "../api/api.js";
 
 const DisplayPost = () => {
     const { id } = useParams();
@@ -10,7 +10,7 @@ const DisplayPost = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await axios.get(`http://localhost:8081/post/getpost/${id}`);
+                const response = await api.get(`/post/getpost/${id}`);
                 setPost(response.data);
             } catch (error) {
                 console.error("Error fetching post:", error);
@@ -18,7 +18,7 @@ const DisplayPost = () => {
                 setLoading(false);
             }
         };
-        fetchPost();
+        fetchPost().then();
     }, [id]);
 
     if (loading) return <div className="text-center py-20">Loading...</div>;
@@ -33,7 +33,7 @@ const DisplayPost = () => {
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <Link to="/" className="text-indigo-600 hover:underline">
+                        <Link to="/home" className="text-indigo-600 hover:underline">
                             &larr; Back to Posts
                         </Link>
                         <div className="text-sm text-gray-500">
