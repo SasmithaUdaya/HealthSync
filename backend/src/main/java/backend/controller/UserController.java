@@ -16,7 +16,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // ✅ Login
+    // Login
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
         try {
@@ -32,7 +32,7 @@ public class UserController {
         }
     }
 
-    // ✅ Register
+    // Register
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
@@ -46,7 +46,7 @@ public class UserController {
         }
     }
 
-    // ✅ Update interests
+    // Update interests
     @PostMapping("/{userId}/interests")
     public ResponseEntity<?> updateUserInterests(
             @PathVariable String userId,
@@ -61,7 +61,7 @@ public class UserController {
         }
     }
 
-    // ✅ Update user (for profile editing)
+    // Update user (for profile editing)
     @PutMapping("/{userId}")
     public ResponseEntity<?> updateUser(
             @PathVariable String userId,
@@ -76,7 +76,7 @@ public class UserController {
         }
     }
 
-    // ✅ Delete user
+    // Delete user
     @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable String userId) {
         try {
@@ -89,7 +89,7 @@ public class UserController {
         }
     }
 
-    // ✅ Get user by ID
+    // Get user by ID
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable String userId) {
         Optional<User> userOptional = userService.getUserById(userId);
@@ -100,7 +100,7 @@ public class UserController {
         }
     }
 
-    // ✅ Get suggested users based on shared interests
+    // Get suggested users based on shared interests
     @GetMapping("/suggested/{userId}")
     public ResponseEntity<?> getSuggestedUsers(@PathVariable String userId) {
         try {

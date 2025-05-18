@@ -48,7 +48,7 @@ const ProfilePage = () => {
     const notFollowed = allSuggested.filter(
       (u) =>
         !following.some((f) => f.followingId === u.id) &&
-        u.id !== userId // Exclude self
+        u.id !== userId 
     );
 
     // Match interests
@@ -102,7 +102,7 @@ const ProfilePage = () => {
 
     // Refresh following list and suggestions
     fetchFollowing();
-    fetchSuggestedUsers(); //  Refresh suggestions after following
+    fetchSuggestedUsers(); 
 
   } catch (err) {
     console.error("Follow error:", err);
@@ -157,7 +157,7 @@ const isFollowing = (targetId) => {
         followingId: targetId,
       },
     });
-    fetchFollowing(); // refresh UI
+    fetchFollowing(); 
   } catch (err) {
     console.error("Unfollow error:", err);
   }
@@ -165,7 +165,7 @@ const isFollowing = (targetId) => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Left: Suggested Users */}
+      
       <div className="w-1/5 p-6 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Suggested Users</h2>
         <div className="space-y-3">
@@ -209,7 +209,7 @@ const isFollowing = (targetId) => {
   <h1 className="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
 
       <div className="bg-white p-6 rounded-lg shadow-md mb-10">
-        {/* Profile picture and user info row */}
+
         <div className="flex items-center gap-6 mb-4">
           <img
             src={`https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}`}
@@ -223,7 +223,7 @@ const isFollowing = (targetId) => {
           </div>
         </div>
 
-        {/* Interests */}
+
         <div className="mb-4">
           <strong className="text-gray-700">Interests:</strong>
           <div className="flex gap-2 flex-wrap mt-2">
@@ -241,7 +241,7 @@ const isFollowing = (targetId) => {
           </div>
         </div>
 
-        {/* Buttons */}
+
         <div className="flex gap-3 mt-4">
           <button
             onClick={openEditDialog}
@@ -310,8 +310,7 @@ const isFollowing = (targetId) => {
     </div>
 
 
-      {/* Right: Sidebar */}
-      {/* (Your sidebar code stays exactly as you posted, unchanged) */}
+
       <div className="w-64 bg-white border-l fixed right-0 top-0 h-full shadow-lg">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
@@ -383,7 +382,7 @@ const isFollowing = (targetId) => {
         </div>
       </div>
 
-      {/* 🔁 Edit Profile Dialog */}
+      {/*  Edit Profile Dialog */}
       <EditProfileDialog
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}

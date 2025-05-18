@@ -92,7 +92,6 @@ export const HomePage = () => {
     };
 
     const handlePostClick = (e, postId) => {
-        // Don't navigate if clicking on buttons or comment section
         if (e.target.closest('button') || e.target.closest('.comment-section')) {
             return;
         }
@@ -382,8 +381,8 @@ export const HomePage = () => {
                     <div className="border-t pt-4">
                     <button
                         onClick={() => {
-                        localStorage.clear();  // ✅ FIXED: clear session
-                        navigate("/");         // or use "/login" if needed
+                        localStorage.clear();  
+                        navigate("/");         
                         }}
                         className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 text-gray-700 transition-colors"
                     >

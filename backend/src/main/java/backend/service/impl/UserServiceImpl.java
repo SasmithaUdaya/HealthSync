@@ -15,13 +15,13 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // ✅ Register User
+    //  Register User
     @Override
     public User registerUser(User user) {
         return userRepository.save(user);
     }
 
-    // ✅ Update User (including interests update)
+    //  Update User 
     @Override
     public User updateUser(String userId, User updatedUser) {
         Optional<User> optionalUser = userRepository.findById(userId);

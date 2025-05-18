@@ -30,7 +30,6 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Header */}
       <div className="flex justify-between items-center p-4 bg-white shadow-md sticky top-0 z-50">
         <h1 className="text-2xl font-bold text-indigo-700">HealthSync</h1>
         <div className="space-x-4">
@@ -49,13 +48,12 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Welcome Message */}
       <div className="text-center mt-8">
         <h2 className="text-xl font-semibold">Welcome to HealthSync Platform</h2>
         <p className="text-gray-600">Connect, learn, and share your health journeys with others.</p>
       </div>
 
-      {/* Search */}
+
       <div className="max-w-2xl mx-auto mt-6 px-4">
         <input
           type="text"
@@ -65,7 +63,7 @@ const LandingPage = () => {
         />
       </div>
 
-      {/* Posts */}
+
       <div className="max-w-2xl mx-auto mt-8 px-4 space-y-6">
         {filteredData.length > 0 ? (
           filteredData.map((post) => (

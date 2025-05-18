@@ -20,6 +20,6 @@ public interface UserService {
     List<String> updateUserInterests(String userId, List<String> interests);
 
 
-    // ✅ New: Login method
+    //  New: Login method
     User loginUser(String email, String password);
 }

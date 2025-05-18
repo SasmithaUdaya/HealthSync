@@ -62,11 +62,11 @@ const SelectInterestsPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-md rounded p-8 w-full max-w-md">
+      <div className="bg-white shadow-md rounded p-8 w-full max-w-2xl">
         <h2 className="text-2xl font-bold text-center text-indigo-600 mb-6">
           Select Your Interests
         </h2>
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-4 gap-4 mb-6">
           {allInterests.map((interest) => (
             <div
               key={interest.label}
